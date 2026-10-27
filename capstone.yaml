@@ -1,0 +1,27 @@
+# Evaluator manifest. The app is not runnable yet.
+# Phase 2 and Phase 3 replace these commands only after they actually boot the system.
+status: not_runnable
+run: docker compose up
+seed: npm run seed
+# test is optional. A test suite is a stretch goal, not a Section 6 requirement.
+test:
+base_url: http://localhost:3000
+endpoints:
+  - method: POST
+    path: /submissions
+    note: Public submission. CORS, validation, rate limit, honeypot, geo, side effect.
+  - method: OPTIONS
+    path: /submissions
+    note: Preflight for the cross-origin form post.
+  - method: GET
+    path: /widgets/:id/config
+    note: Public config. Small payload. Short Cache-Control max-age.
+  - method: GET
+    path: /widget.v1.js
+    note: Versioned widget bundle. Long cache. New version means a new URL.
+  - method: GET
+    path: /widgets/:id/embed
+    note: Returns the one-line script snippet for this widget.
+  - method: GET
+    path: /dashboard/stats
+    note: Authenticated owner stats. Tenant scoped.
