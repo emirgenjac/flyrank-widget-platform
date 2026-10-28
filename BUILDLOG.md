@@ -21,6 +21,14 @@ What I can explain line by line:
 ## Entries
 
 Date: 2026-10-28
+Phase: 3, task 3.4 customer site
+What I asked for: One HTML page for the customer site, served on a port that is not the API port.
+Where help was useful: `customer-site` serves `index.html` on port 8080. The API stays on port 3000. The page is a heading and a line that says the widget snippet is pasted below. Compose starts that service with the API and Postgres.
+Where it was wrong: The page does not load the widget yet. That render is the next task, so the HTML does not include the script tag.
+What I changed myself: I reviewed the code and prompts.
+What I can explain line by line: Why this origin is separate from the API, and why the server only returns that one page.
+
+Date: 2026-10-28
 Phase: 3, task 3.3 embed snippet
 What I asked for: One embed line per widget, pointing at the versioned script and the widget id.
 Where help was useful: Create and `GET /widgets/:id/embed` already returned that line. The check now requires the exact one-line snippet: `src` is `/widget.v1.js` and `data-widget-id` is the public id. Another tenant's embed request is 404. A live create returned `<script src="http://127.0.0.1:3010/widget.v1.js" data-widget-id="6a4S9xP4LRHb"></script>`, and that URL returned the cached script.
