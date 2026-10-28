@@ -21,6 +21,14 @@ What I can explain line by line:
 ## Entries
 
 Date: 2026-10-28
+Phase: 2, task 2.2 users migration
+What I asked for: Do the next task.
+Where help was useful: `migrations/003_users.sql` adds `tenants.name` and `users` with a tenant foreign key, a unique lowercase email, and a password hash. The API applied it on startup.
+Where it was wrong: There is still no login route. The hash column is empty until task 2.3.
+What I changed myself: I asked for the next task.
+What I can explain line by line: Why the email must already be lowercase, and why `password_hash` cannot be empty.
+
+Date: 2026-10-28
 Phase: 2, task 2.1 Express and Compose
 What I asked for: Do the next task.
 Where help was useful: `src/main.js`, `src/http/app.js`, `src/data/migrate.js`, `src/jobs/runner.js`, and `docker-compose.yml`. `GET /health` returned `{ "ok": true, "db": "up" }`.

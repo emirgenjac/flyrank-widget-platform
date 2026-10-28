@@ -20,7 +20,7 @@ A real CDN, domain, or hosted deployment is a non-goal, so the API and the custo
 
 ## Tenancy
 
-Every owner query is built in `src/data/ownerQueries.js` and includes `WHERE tenant_id = $1`. The indexes are a unique `widgets.public_id`, `widgets (tenant_id)`, a unique `submissions.idempotency_key`, `submissions (widget_id, created_at)`, and `submissions (tenant_id)`.
+Every owner query is built in `src/data/ownerQueries.js` and includes `WHERE tenant_id = $1`. A user belongs to one tenant and stores an email plus a password hash, never the password. The indexes are a unique `widgets.public_id`, `widgets (tenant_id)`, a unique `submissions.idempotency_key`, `submissions (widget_id, created_at)`, `submissions (tenant_id)`, and `users (tenant_id)`.
 
 ## Embed
 

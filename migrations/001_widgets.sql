@@ -1,5 +1,5 @@
--- Widget model from DESIGN.md. Tenants exist here only so widgets.tenant_id
--- has a real foreign key. Users, submissions, and auth columns come later.
+-- Widget model from DESIGN.md. Tenants exist here so widgets.tenant_id
+-- has a real foreign key. Submissions are in 002. Users are in 003.
 
 CREATE TABLE tenants (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
