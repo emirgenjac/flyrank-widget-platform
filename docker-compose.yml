@@ -30,6 +30,11 @@ services:
       RATE_LIMIT_IP_WINDOW_MS: 60000
       RATE_LIMIT_WIDGET_MAX: 60
       RATE_LIMIT_WIDGET_WINDOW_MS: 60000
+      GEO_MODE: mock
+      GEO_PROVIDER_A_URL: http://ip-api.com
+      GEO_PROVIDER_B_URL: https://ipapi.co
+      GEO_MOCK_A_DOWN: "false"
+      GEO_MOCK_B_DOWN: "false"
     depends_on:
       db:
         condition: service_healthy

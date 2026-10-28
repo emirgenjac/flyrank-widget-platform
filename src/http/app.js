@@ -14,6 +14,7 @@ export function createApp({
   findWidgetByPublicId,
   submissions,
   rateLimit,
+  geo,
   publicBaseUrl,
   assetVersion,
 } = {}) {
@@ -54,6 +55,7 @@ export function createApp({
       widgetMax: 60,
       widgetWindowMs: 60_000,
     }),
+    geo: geo ?? null,
   });
 
   app.use((req, res) => {

@@ -175,12 +175,30 @@ async function decideStoredSubmission(repo, incoming) {
   return null;
 }
 
-export async function storeSubmission(repo, accepted) {
-  const incoming = toSubmissionInsert(accepted);
-  const ready = await decideStoredSubmission(repo, incoming);
+async function locatedGeo(locate, ip) {
+  if (!locate) {
+    return { geo: null, geo_provider: null };
+  }
+  try {
+    const found = await locate(ip);
+    const normalized = normalizeGeo(found?.geo ?? null, found?.geo_provider ?? null);
+    if (!normalized.ok) {
+      return { geo: null, geo_provider: null };
+    }
+    return { geo: normalized.geo, geo_provider: normalized.geo_provider };
+  } catch {
+    return { geo: null, geo_provider: null };
+  }
+}
+
+export async function storeSubmission(repo, accepted, locate) {
+  const probe = toSubmissionInsert(accepted);
+  const ready = await decideStoredSubmission(repo, probe);
   if (ready) {
     return ready;
   }
+  const located = await locatedGeo(locate, accepted.client_ip);
+  const incoming = toSubmissionInsert(accepted, located.geo, located.geo_provider);
   try {
     const row = await repo.insert(incoming);
     return { outcome: "insert", id: row.id };

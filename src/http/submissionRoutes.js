@@ -65,7 +65,7 @@ export function submissionCors(req, res, next) {
   next();
 }
 
-export function registerSubmissionRoutes(app, { findWidgetByPublicId, submissions, rateLimit } = {}) {
+export function registerSubmissionRoutes(app, { findWidgetByPublicId, submissions, rateLimit, geo } = {}) {
   app.post("/submissions", async (req, res) => {
     const clientIp = connectionIp(req);
     if (rateLimit && !rateLimit.allowIp(clientIp)) {
@@ -104,7 +104,11 @@ export function registerSubmissionRoutes(app, { findWidgetByPublicId, submission
     }
 
     try {
-      const stored = await storeSubmission(submissions, result.value);
+      const stored = await storeSubmission(
+        submissions,
+        result.value,
+        geo ? (ip) => geo.lookup(ip) : null,
+      );
       if (stored.outcome === "conflict") {
         res.status(409).json({ error: "idempotency conflict" });
         return;

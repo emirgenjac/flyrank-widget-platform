@@ -2,6 +2,7 @@ import { createPool } from "./data/db.js";
 import { migrate } from "./data/migrate.js";
 import { createApp } from "./http/app.js";
 import { startJobs } from "./jobs/runner.js";
+import { createGeoClient, readGeoConfig } from "./logic/geo.js";
 import { readRateLimitConfig } from "./logic/rateLimit.js";
 
 const databaseUrl = process.env.DATABASE_URL;
@@ -24,6 +25,7 @@ const server = createApp({
   db: pool,
   tokenSecret,
   rateLimit: readRateLimitConfig(process.env),
+  geo: createGeoClient(readGeoConfig(process.env)),
 }).listen(port, () => {
   console.log(`api listening on ${port}`);
 });

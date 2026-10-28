@@ -21,6 +21,14 @@ What I can explain line by line:
 ## Entries
 
 Date: 2026-10-28
+Phase: 2, task 2.10 geo chain
+What I asked for: One geo lookup that tries ip-api.com and then ipapi.co, with mock proof for A down and for both down.
+Where help was useful: Mock mode does not call the network. A down and B up stores `geo_provider` `ipapi.co` and country `DE`. Both down still return 201 and store null geo. Live mode uses the same order and treats a bad response as that provider being down.
+Where it was wrong: The default mock has both providers up, so a normal local submit is enriched by provider A. The down cases are flag settings, not the Compose default.
+What I changed myself: I reviewed the code and prompts.
+What I can explain line by line: Why a provider with a bad payload is skipped, and why a lookup failure still inserts the row.
+
+Date: 2026-10-28
 Phase: 2, task 2.9 reserved field
 What I asked for: A filled reserved field is not stored, and the response does not name the rule.
 Where help was useful: `POST /submissions` returned 200 `{ "ok": true }`. The body did not contain the field name or the submitted value. Postgres counted 0 rows for widget `6eef7ad3-0f6e-4dcf-8028-5e4d79760d9a`. The transcript is in `EVIDENCE.md`.
