@@ -6,7 +6,7 @@ This is a backend capstone. The public internet is the client: untrusted input, 
 
 ## Status
 
-Not runnable. There is no HTTP server yet. Widget, submission, tenant queries, embed payloads, and the route contracts are coded. `npm test` checks them. The server still does not listen.
+Not runnable. There is no HTTP server yet. Phase 1 design is the one-page `DESIGN.md`. Widget, submission, tenant queries, embed payloads, and the route contracts are coded. `npm test` checks them. The server still does not listen.
 
 Intended commands, once Phase 2 and Phase 3 exist:
 

@@ -21,6 +21,14 @@ What I can explain line by line:
 ## Entries
 
 Date: 2026-10-28
+Phase: 1, task 1.7 design gate
+What I asked for: Do the next task, the one-page design gate.
+Where help was useful: `DESIGN.md` was cut from the long worksheet to one page. The column rules and route examples stay in the code files the page names.
+Where it was wrong: Nothing here boots a server. Phase 2 has not started.
+What I changed myself: I asked for the next task. I still review the page before treating Phase 1 as closed.
+What I can explain line by line: Why the page points at `src/http/contracts.js` instead of copying every example, and why the non-goal is local ports only.
+
+Date: 2026-10-28
 Phase: 1, task 1.6 non-goal
 What I asked for: Do the next task.
 Where help was useful: One sentence in `DESIGN.md`. A real CDN, domain, or hosted deployment stays out of scope.
