@@ -23,7 +23,9 @@ test("the customer page is html and is not the API port", async () => {
     assert.match(response.headers.get("content-type"), /^text\/html/);
     const body = await response.text();
     assert.match(body, /<h1>Customer site<\/h1>/);
-    assert.equal(body.includes("/widget.v1.js"), false);
+    const snippet = body.match(/<script src="http:\/\/127\.0\.0\.1:3000\/widget\.v1\.js" data-widget-id="mckICgybxZdo"><\/script>/);
+    assert.ok(snippet);
+    assert.equal(snippet[0].includes("\n"), false);
     const missing = await fetch(`http://127.0.0.1:${port}/nope`);
     assert.equal(missing.status, 404);
   });

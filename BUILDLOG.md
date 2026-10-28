@@ -21,6 +21,14 @@ What I can explain line by line:
 ## Entries
 
 Date: 2026-10-28
+Phase: 3, task 3.5 widget form on the customer page
+What I asked for: The widget form and submit button on the customer page, loaded from the snippet.
+Where help was useful: `customer-site/index.html` now has the one script line for widget `mckICgybxZdo`. The page origin is `http://127.0.0.1:8080` and the script origin is `http://127.0.0.1:3000`. The browser showed Geo check, an Email field, and Subscribe. After submit the page said Thanks. The widget's submission count went from 2 to 3, and the new row is enriched by `ip-api.com`.
+Where it was wrong: The API process that was already on port 3000 did not have the config route yet, so the form would have stayed unavailable. Rebuilding that image made `GET /widgets/mckICgybxZdo/config` return 200 to the page origin. The pasted public id belongs to this database. A fresh database needs its own snippet.
+What I changed myself: I reviewed the code and prompts.
+What I can explain line by line: Why the script tag is on the customer page, and why the form is built from the public config.
+
+Date: 2026-10-28
 Phase: 3, task 3.4 customer site
 What I asked for: One HTML page for the customer site, served on a port that is not the API port.
 Where help was useful: `customer-site` serves `index.html` on port 8080. The API stays on port 3000. The page is a heading and a line that says the widget snippet is pasted below. Compose starts that service with the API and Postgres.

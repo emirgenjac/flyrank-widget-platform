@@ -77,8 +77,18 @@ GET /widget.v2.js 404 {"error":"not found"}
 cache-control: absent
 ```
 
-- [ ] The widget renders on a page served from a different origin than the API.
-  - Proof:
+- [x] The widget renders on a page served from a different origin than the API.
+  - Proof: 2026-10-28. Page origin `http://127.0.0.1:8080`. API origin `http://127.0.0.1:3000`. The page snippet loads `widget.v1.js` for `mckICgybxZdo`. The page showed the title Geo check, an Email field, and a Subscribe button. Submitting stored one row. That widget went from 2 submissions to 3. The new row is `893f1918-e988-43ea-b00d-80e0b18ac45e`, provider `ip-api.com`, country `US`.
+
+```text
+page http://127.0.0.1:8080
+api http://127.0.0.1:3000
+<script src="http://127.0.0.1:3000/widget.v1.js" data-widget-id="mckICgybxZdo"></script>
+form title Geo check
+button Subscribe
+rows before 2
+rows after 3
+```
 
 ## Section 6, public submission API
 
