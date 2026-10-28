@@ -21,6 +21,14 @@ What I can explain line by line:
 ## Entries
 
 Date: 2026-10-28
+Phase: 3, task 3.7 seed and runnable setup
+What I asked for: A seed command with two demo tenants, and a README a stranger can follow to boot the app.
+Where help was useful: `npm run seed` loads Northwind (`owner-a@example.com`, widget `demoAwidget1`) and Brightpath (`owner-b@example.com`, widget `demoBwidget1`), plus one enriched submission for Northwind. A second run printed the same tenant ids, `576695d7-66f5-4ff5-a58c-1514e241c569` and `fbd8c354-f706-4df7-9450-add61829c9ca`. `docker compose up -d` then `GET http://127.0.0.1:3010/health` returned `{ "ok": true, "db": "up" }`. Owner A saw 1 dashboard row and owner B saw 0. The customer page at `http://127.0.0.1:8080` rendered Join the list and, after submit, said Thanks. That widget then had 2 enriched rows.
+Where it was wrong: Host port 5432 is already a local Postgres, and host port 3000 was already taken, so Compose could not publish the original ports. Postgres is now on host port 5435 and the API is on host port 3010.
+What I changed myself: I reviewed the code and prompts.
+What I can explain line by line: Why the seed looks up the email and the public id before inserting, and why a second run does not add another submission.
+
+Date: 2026-10-28
 Phase: 3, task 3.6 dashboard
 What I asked for: An authenticated dashboard for the submission list, counts over time, per-widget stats, and a geo breakdown.
 Where help was useful: `GET /dashboard/submissions` and `GET /dashboard/stats` take the tenant from the bearer token. A missing token is 401. Tenant A saw submission `6015efec-06d2-4ed0-be45-b76aae4cb2a7`. Tenant B saw no rows. The list leaves out the client IP and the idempotency key. Counts are grouped by UTC date. The stats query on the older tenant returned 4 rows on 2026-10-28, widget `mckICgybxZdo` count 3, and geo `US` count 3.

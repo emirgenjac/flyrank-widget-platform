@@ -9,7 +9,7 @@ services:
       POSTGRES_PASSWORD: widget
       POSTGRES_DB: widget_platform
     ports:
-      - "5432:5432"
+      - "5435:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U widget -d widget_platform"]
       interval: 2s
@@ -19,12 +19,12 @@ services:
   api:
     build: .
     ports:
-      - "3000:3000"
+      - "3010:3000"
     environment:
       PORT: 3000
       DATABASE_URL: postgres://widget:widget@db:5432/widget_platform
       JWT_SECRET: local-dev-only-change-this
-      WIDGET_PUBLIC_BASE_URL: http://localhost:3000
+      WIDGET_PUBLIC_BASE_URL: http://127.0.0.1:3010
       WIDGET_ASSET_VERSION: v1
       RATE_LIMIT_IP_MAX: 30
       RATE_LIMIT_IP_WINDOW_MS: 60000

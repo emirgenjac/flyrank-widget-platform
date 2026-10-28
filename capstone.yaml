@@ -1,11 +1,10 @@
-# Evaluator manifest. The app is not runnable yet.
-# Phase 2 and Phase 3 replace these commands only after they actually boot the system.
-status: not_runnable
+# Evaluator manifest. docker compose up boots the API, Postgres, and the customer site.
+status: runnable
 run: docker compose up
 seed: npm run seed
-# npm test checks the widget model only. The acceptance suite is still a stretch goal.
+# npm test checks the widget model, submission path, delivery, and dashboard.
 test: npm test
-base_url: http://localhost:3000
+base_url: http://127.0.0.1:3010
 endpoints:
   - method: POST
     path: /submissions
@@ -22,6 +21,9 @@ endpoints:
   - method: GET
     path: /widgets/:id/embed
     note: Returns the one-line script snippet for this widget.
+  - method: GET
+    path: /dashboard/submissions
+    note: Authenticated submission list. Tenant scoped.
   - method: GET
     path: /dashboard/stats
     note: Authenticated owner stats. Tenant scoped.
