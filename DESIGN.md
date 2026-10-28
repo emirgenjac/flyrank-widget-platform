@@ -127,13 +127,13 @@ Owner reads go through `src/data/ownerQueries.js`. Every statement there has `WH
 
 ## Embed flow
 
-The sequence is locked. The payloads are open.
+`src/logic/embed.js` builds the four payloads. The customer page and the HTTP routes come later.
 
-1. The owner creates a widget and receives one `script` line.
-2. The customer page loads the versioned bundle from a URL that changes when the file changes.
-3. The bundle fetches `GET /widgets/:id/config` (small body, short `Cache-Control` max-age).
-4. The widget renders a form and a submit button.
-5. The visitor posts to `POST /submissions` from a different origin than the API.
+1. Snippet, one line: `<script src="{origin}/widget.{version}.js" data-widget-id="{public_id}"></script>`.
+2. The script URL changes when `version` changes. Its cache header is `public, max-age=31536000, immutable`. The public id is not in that URL.
+3. Config is `GET /widgets/{public_id}/config`. The body is `id`, `type`, `title`, `description`, `fields`, `button_text`, `display_options`, and `submit_url`. No tenant id and no internal id. Cache header is `public, max-age=60`.
+4. Render uses that config: the form fields, a submit button, and an empty `company_website` input.
+5. Submit posts JSON to `{origin}/submissions` with `public_id`, `idempotency_key`, `fields`, and `company_website` set to an empty string.
 
 ## API contracts
 

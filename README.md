@@ -6,7 +6,7 @@ This is a backend capstone. The public internet is the client: untrusted input, 
 
 ## Status
 
-Not runnable. There is no HTTP server yet. The widget model, submission model, and tenant-scoped owner queries are coded. `npm test` checks them. The embed flow and API routes are still open.
+Not runnable. There is no HTTP server yet. Widget, submission, tenant queries, and the embed payloads are coded. `npm test` checks them. API routes are still open.
 
 Intended commands, once Phase 2 and Phase 3 exist:
 

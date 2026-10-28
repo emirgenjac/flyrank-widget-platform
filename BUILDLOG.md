@@ -21,6 +21,14 @@ What I can explain line by line:
 ## Entries
 
 Date: 2026-10-28
+Phase: 1, task 1.4 embed flow
+What I asked for: Start the next task in code.
+Where help was useful: `src/logic/embed.js` builds the snippet, the versioned script URL, the small config, the form, and the submit body. `npm test` passed 29 checks.
+Where it was wrong: Nothing is served over HTTP yet. The cache headers are values the later route must send.
+What I changed myself: I asked to start task 1.4.
+What I can explain line by line: Why the public id is on the script tag and not in the script URL, and why the config omits the tenant id.
+
+Date: 2026-10-28
 Phase: 1, tasks 1.2 and 1.3 in code
 What I asked for: Stop leaving tasks as markdown only. Code the submission model, then the tenant queries and indexes.
 Where help was useful: `src/logic/submission.js`, `migrations/002_submissions.sql`, and `src/data/ownerQueries.js`. `npm test` passed 26 checks.
