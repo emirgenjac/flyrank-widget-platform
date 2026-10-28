@@ -35,6 +35,10 @@ services:
       GEO_PROVIDER_B_URL: https://ipapi.co
       GEO_MOCK_A_DOWN: "false"
       GEO_MOCK_B_DOWN: "false"
+      EMAIL_MODE: console
+      SMTP_HOST: localhost
+      SMTP_PORT: 1025
+      SIDE_EFFECT_FORCE_FAIL: "false"
     depends_on:
       db:
         condition: service_healthy

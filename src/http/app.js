@@ -15,6 +15,7 @@ export function createApp({
   submissions,
   rateLimit,
   geo,
+  jobs,
   publicBaseUrl,
   assetVersion,
 } = {}) {
@@ -56,6 +57,7 @@ export function createApp({
       widgetWindowMs: 60_000,
     }),
     geo: geo ?? null,
+    jobs: jobs ?? null,
   });
 
   app.use((req, res) => {

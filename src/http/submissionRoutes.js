@@ -65,7 +65,7 @@ export function submissionCors(req, res, next) {
   next();
 }
 
-export function registerSubmissionRoutes(app, { findWidgetByPublicId, submissions, rateLimit, geo } = {}) {
+export function registerSubmissionRoutes(app, { findWidgetByPublicId, submissions, rateLimit, geo, jobs } = {}) {
   app.post("/submissions", async (req, res) => {
     const clientIp = connectionIp(req);
     if (rateLimit && !rateLimit.allowIp(clientIp)) {
@@ -112,6 +112,16 @@ export function registerSubmissionRoutes(app, { findWidgetByPublicId, submission
       if (stored.outcome === "conflict") {
         res.status(409).json({ error: "idempotency conflict" });
         return;
+      }
+      if (stored.outcome === "insert" && jobs) {
+        const job = {
+          id: stored.id,
+          idempotencyKey: result.value.idempotency_key,
+          email: result.value.payload.email ?? null,
+        };
+        res.once("finish", () => {
+          jobs.enqueue(job);
+        });
       }
       res.status(stored.outcome === "insert" ? 201 : 200).json({ ok: true, id: stored.id });
     } catch {

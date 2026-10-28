@@ -2,6 +2,7 @@ import { createPool } from "./data/db.js";
 import { migrate } from "./data/migrate.js";
 import { createApp } from "./http/app.js";
 import { startJobs } from "./jobs/runner.js";
+import { readSideEffectConfig } from "./jobs/sideEffect.js";
 import { createGeoClient, readGeoConfig } from "./logic/geo.js";
 import { readRateLimitConfig } from "./logic/rateLimit.js";
 
@@ -20,12 +21,13 @@ const port = Number(process.env.PORT || 3000);
 const pool = createPool(databaseUrl);
 
 await migrate(pool);
-const jobs = startJobs();
+const jobs = startJobs(readSideEffectConfig(process.env));
 const server = createApp({
   db: pool,
   tokenSecret,
   rateLimit: readRateLimitConfig(process.env),
   geo: createGeoClient(readGeoConfig(process.env)),
+  jobs,
 }).listen(port, () => {
   console.log(`api listening on ${port}`);
 });

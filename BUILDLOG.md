@@ -21,6 +21,14 @@ What I can explain line by line:
 ## Entries
 
 Date: 2026-10-28
+Phase: 2, task 2.11 confirmation job
+What I asked for: A background confirmation after the row is stored, with retries, a failure alert, and one send per idempotency key.
+Where help was useful: The handler enqueues the job on response finish, so the send is not part of the request. A forced failure retries 3 times, alerts with the submission id and attempt count, and the HTTP response stays 201 with the row kept. A replay does not send again. Console mode writes one line. SMTP can deliver to local Mailpit.
+Where it was wrong: The alert does not include the recipient. That keeps the address out of the failure line.
+What I changed myself: I reviewed the code and prompts.
+What I can explain line by line: Why a replay does not enqueue another send, and why a thrown job cannot change the status code.
+
+Date: 2026-10-28
 Phase: 2, task 2.10 geo chain
 What I asked for: One geo lookup that tries ip-api.com and then ipapi.co, with mock proof for A down and for both down.
 Where help was useful: Mock mode does not call the network. A down and B up stores `geo_provider` `ipapi.co` and country `DE`. Both down still return 201 and store null geo. Live mode uses the same order and treats a bad response as that provider being down.
