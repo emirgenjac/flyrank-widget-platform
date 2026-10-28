@@ -3,7 +3,7 @@ import { PUBLIC_ID_PATTERN, RESERVED_FIELD_NAME } from "./widget.js";
 export const SCRIPT_CACHE_CONTROL = "public, max-age=31536000, immutable";
 export const CONFIG_CACHE_CONTROL = "public, max-age=60";
 
-const VERSION_PATTERN = /^[A-Za-z0-9._-]{1,32}$/;
+export const ASSET_VERSION_PATTERN = /^[A-Za-z0-9._-]{1,32}$/;
 
 function apiOrigin(baseUrl) {
   let url;
@@ -22,7 +22,7 @@ function apiOrigin(baseUrl) {
 }
 
 function requireVersion(assetVersion) {
-  if (!VERSION_PATTERN.test(assetVersion)) {
+  if (!ASSET_VERSION_PATTERN.test(assetVersion)) {
     throw new TypeError("Widget asset version must be a cache-bust token such as v1.");
   }
   return assetVersion;

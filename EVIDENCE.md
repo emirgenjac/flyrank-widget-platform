@@ -44,8 +44,18 @@ submission tenant after B delete: f4ed0d3f-4f05-4efa-a3bf-66706b6e2ffd
 - [ ] The public config endpoint serves a small payload with `Cache-Control` and a `max-age`.
   - Proof:
 
-- [ ] Widget JavaScript is served as a versioned bundle. A new version uses a new URL or a cache-bust.
-  - Proof:
+- [x] Widget JavaScript is served as a versioned bundle. A new version uses a new URL or a cache-bust.
+  - Proof: 2026-10-28, API on `http://127.0.0.1:3000`. The running version token is `v1`.
+
+```text
+GET /widget.v1.js 200
+cache-control: public, max-age=31536000, immutable
+content-type: application/javascript; charset=utf-8
+first line: /* v1 */
+
+GET /widget.v2.js 404 {"error":"not found"}
+cache-control: absent
+```
 
 - [ ] The widget renders on a page served from a different origin than the API.
   - Proof:

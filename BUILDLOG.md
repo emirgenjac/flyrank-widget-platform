@@ -21,6 +21,14 @@ What I can explain line by line:
 ## Entries
 
 Date: 2026-10-28
+Phase: 3, task 3.1 versioned widget script
+What I asked for: The widget script at a versioned URL with a long cache.
+Where help was useful: `GET /widget.v1.js` returns the bundle with `Cache-Control: public, max-age=31536000, immutable`. The response body starts with the version token. `GET /widget.v2.js` is 404 while the app version is v1, and the reverse is true when the token is v2. The same token is the one in the embed snippet. The API on port 3000 returned that pair.
+Where it was wrong: A one-year cache on a 404 would pin a missing version. Only the 200 response sets that header.
+What I changed myself: I reviewed the code and prompts.
+What I can explain line by line: Why the script URL has to change when the bundle changes, and why the route is public.
+
+Date: 2026-10-28
 Phase: 2, task 2.13 foreign-origin submission
 What I asked for: A submission with a foreign Origin that stores one enriched row.
 Where help was useful: `OPTIONS` and `POST /submissions` from `https://customer.example` to the API on port 3000. The response is 201 `e46b6489-3b6f-4441-88ae-93633bc3e733`. That row is widget `89db14d2-29cd-4e29-b03c-e3cedae9add1`, tenant `f4ed0d3f-4f05-4efa-a3bf-66706b6e2ffd`, provider `ip-api.com`, country `US`, city Ashburn. The widget's submission count went from 1 to 2.

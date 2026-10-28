@@ -6,6 +6,7 @@ import { createRateLimiter } from "../logic/rateLimit.js";
 import { authGate } from "./authGate.js";
 import { registerAuthRoutes } from "./authRoutes.js";
 import { applySubmissionCors, registerSubmissionRoutes, submissionCors } from "./submissionRoutes.js";
+import { registerScriptRoute } from "./scriptRoute.js";
 import { registerWidgetRoutes } from "./widgetRoutes.js";
 
 export function createApp({
@@ -41,13 +42,15 @@ export function createApp({
     }
   });
 
+  const version = assetVersion ?? process.env.WIDGET_ASSET_VERSION ?? "v1";
   registerAuthRoutes(app, { db, tokenSecret });
+  registerScriptRoute(app, { assetVersion: version });
   app.use(authGate(tokenSecret));
   const widgetRepo = widgets ?? (db ? createWidgetRepository(db) : null);
   registerWidgetRoutes(app, {
     widgets: widgetRepo,
     publicBaseUrl: publicBaseUrl ?? process.env.WIDGET_PUBLIC_BASE_URL ?? "http://localhost:3000",
-    assetVersion: assetVersion ?? process.env.WIDGET_ASSET_VERSION ?? "v1",
+    assetVersion: version,
   });
   registerSubmissionRoutes(app, {
     findWidgetByPublicId: findWidgetByPublicId
