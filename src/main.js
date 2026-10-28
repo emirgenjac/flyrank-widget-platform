@@ -4,6 +4,7 @@ import { createApp } from "./http/app.js";
 import { startJobs } from "./jobs/runner.js";
 import { readSideEffectConfig } from "./jobs/sideEffect.js";
 import { createGeoClient, readGeoConfig } from "./logic/geo.js";
+import { createLogger } from "./logic/logging.js";
 import { readRateLimitConfig } from "./logic/rateLimit.js";
 
 const databaseUrl = process.env.DATABASE_URL;
@@ -18,18 +19,24 @@ if (!tokenSecret || tokenSecret.length < 16) {
 }
 
 const port = Number(process.env.PORT || 3000);
+const logger = createLogger([databaseUrl, tokenSecret]);
 const pool = createPool(databaseUrl);
 
 await migrate(pool);
-const jobs = startJobs(readSideEffectConfig(process.env));
+const jobs = startJobs({
+  ...readSideEffectConfig(process.env),
+  writeLog: (line) => logger.log(line),
+  writeError: (line) => logger.error(line),
+});
 const server = createApp({
   db: pool,
   tokenSecret,
   rateLimit: readRateLimitConfig(process.env),
   geo: createGeoClient(readGeoConfig(process.env)),
   jobs,
+  logger,
 }).listen(port, () => {
-  console.log(`api listening on ${port}`);
+  logger.log(`api listening on ${port}`);
 });
 
 function shutdown() {

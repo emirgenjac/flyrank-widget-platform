@@ -1,6 +1,7 @@
 import express from "express";
 import { createSubmissionRepository } from "../data/submissions.js";
 import { createWidgetRepository } from "../data/widgets.js";
+import { createLogger } from "../logic/logging.js";
 import { createRateLimiter } from "../logic/rateLimit.js";
 import { authGate } from "./authGate.js";
 import { registerAuthRoutes } from "./authRoutes.js";
@@ -18,7 +19,10 @@ export function createApp({
   jobs,
   publicBaseUrl,
   assetVersion,
+  logger,
+  mount,
 } = {}) {
+  const log = logger ?? createLogger();
   const app = express();
   app.disable("x-powered-by");
   app.use("/submissions", submissionCors);
@@ -60,11 +64,15 @@ export function createApp({
     jobs: jobs ?? null,
   });
 
+  if (typeof mount === "function") {
+    mount(app);
+  }
+
   app.use((req, res) => {
     res.status(404).json({ error: "not found" });
   });
 
-  app.use((error, req, res, next) => {
+  app.use((error, req, res, _next) => {
     if (req.path === "/submissions") {
       applySubmissionCors(req, res);
     }
@@ -77,7 +85,11 @@ export function createApp({
       res.status(400).json({ error: errorName });
       return;
     }
-    next(error);
+    if (res.headersSent) {
+      return;
+    }
+    log.error("request failed");
+    res.status(500).json({ error: "unavailable" });
   });
 
   return app;

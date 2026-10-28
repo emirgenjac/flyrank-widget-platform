@@ -9,16 +9,18 @@ function wait(ms) {
   });
 }
 
-function defaultAlert(info) {
-  console.error(`side effect failed submission=${info.submissionId} attempts=${info.attempts}`);
+function defaultAlert(info, writeError) {
+  writeError(`side effect failed submission=${info.submissionId} attempts=${info.attempts}`);
 }
 
 export function startJobs(options = {}) {
   const attempts = options.maxAttempts ?? 3;
   const delayMs = options.delayMs ?? 25;
-  const alert = options.alert ?? defaultAlert;
+  const writeLog = options.writeLog ?? ((line) => console.log(line));
+  const writeError = options.writeError ?? ((line) => console.error(line));
+  const alert = options.alert ?? ((info) => defaultAlert(info, writeError));
   const forceFail = options.forceFail ?? false;
-  const send = options.send ?? ((job) => deliverConfirmation(job, { ...options, forceFail }));
+  const send = options.send ?? ((job) => deliverConfirmation(job, { ...options, forceFail }, writeLog));
   const queue = [];
   const queued = new Set();
   const settled = new Set();

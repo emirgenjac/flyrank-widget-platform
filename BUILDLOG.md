@@ -21,6 +21,14 @@ What I can explain line by line:
 ## Entries
 
 Date: 2026-10-28
+Phase: 2, task 2.12 secrets and logs
+What I asked for: Secrets stay in the environment, and log lines do not include them.
+Where help was useful: Startup, confirmation, and failure lines already named only the port, the submission id, or the attempt count. The remaining leak was an unexpected error: Express would print the exception. That handler now logs `request failed` and returns `{ "error": "unavailable" }`. A logger strips configured secret values, database userinfo passwords, and bearer tokens before write.
+Where it was wrong: Printing the exception message would have been useful for debugging, and it can also carry a connection string. The fixed line is the one that ships.
+What I changed myself: I reviewed the code and prompts.
+What I can explain line by line: Why the error handler does not forward the exception, and why a database URL in a log line loses the password.
+
+Date: 2026-10-28
 Phase: 2, task 2.11 confirmation job
 What I asked for: A background confirmation after the row is stored, with retries, a failure alert, and one send per idempotency key.
 Where help was useful: The handler enqueues the job on response finish, so the send is not part of the request. A forced failure retries 3 times, alerts with the submission id and attempt count, and the HTTP response stays 201 with the row kept. A replay does not send again. Console mode writes one line. SMTP can deliver to local Mailpit.

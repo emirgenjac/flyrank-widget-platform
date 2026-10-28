@@ -45,6 +45,42 @@ test("a successful send runs once for the same key", async () => {
   jobs.stop();
 });
 
+test("default job lines go through the log writers", async () => {
+  const lines = [];
+  const errors = [];
+  const jobs = startJobs({
+    delayMs: 0,
+    writeLog: (line) => lines.push(line),
+    writeError: (line) => errors.push(line),
+    ...readSideEffectConfig({ EMAIL_MODE: "console", SIDE_EFFECT_FORCE_FAIL: "false" }),
+  });
+  jobs.enqueue({
+    id: "44444444-4444-4444-8444-444444444447",
+    idempotencyKey: "33333333-3333-4333-8333-333333333363",
+    email: "ada@example.com",
+  });
+  await jobs.whenIdle();
+  jobs.stop();
+
+  const failing = startJobs({
+    forceFail: true,
+    delayMs: 0,
+    writeError: (line) => errors.push(line),
+  });
+  failing.enqueue({
+    id: "44444444-4444-4444-8444-444444444448",
+    idempotencyKey: "33333333-3333-4333-8333-333333333364",
+    email: "ada@example.com",
+  });
+  await failing.whenIdle();
+  failing.stop();
+
+  assert.deepEqual(lines, ["confirmation sent submission=44444444-4444-4444-8444-444444444447"]);
+  assert.deepEqual(errors, ["side effect failed submission=44444444-4444-4444-8444-444444444448 attempts=3"]);
+  assert.equal(JSON.stringify(lines).includes("ada@example.com"), false);
+  assert.equal(JSON.stringify(errors).includes("ada@example.com"), false);
+});
+
 test("console delivery writes one line and does not include a secret setting", async () => {
   const lines = [];
   await deliverConfirmation(
