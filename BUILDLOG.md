@@ -21,6 +21,14 @@ What I can explain line by line:
 ## Entries
 
 Date: 2026-10-28
+Phase: 3, task 3.8 Section 6 proofs
+What I asked for: One real command proof for every Section 6 box.
+Where help was useful: The empty boxes now have transcripts from `http://127.0.0.1:3010`. Missing and invalid auth are 401. Create, read, update, and delete ran for tenant `576695d7-66f5-4ff5-a58c-1514e241c569`, and the proof widget was deleted. Malformed JSON is 400 and the oversized body is 413. An IP burst of one allowed request returned 429, then the next window stored `915a79d8-2094-4851-9605-cad0c97ecbec`. A second request to `demoAwidget1` returned 429, and `demoBwidget1` still stored `f3c7629f-afda-4ab6-a990-31b782ef417d`. Provider A down stored `d7b2c3ce-285b-4566-8c43-5636344f1232` with `ipapi.co`, `DE`, Berlin. Both providers down stored `daa4d90c-89a6-499e-ab09-5cb44cee02ff` with no geo. Forced confirmation failure stored `fe80e263-2cf5-4852-a2a3-86487659d99e` and logged `attempts=3` with no recipient.
+Where it was wrong: The first IP burst allowed two requests and waited before the third, so that burst stored three rows. The recorded burst uses a limit of one. The API also needed a moment after each recreate before it accepted connections.
+What I changed myself: I reviewed the code and prompts. The live limits are back to 30 per IP and 60 per widget, both geo mock flags are false, and the forced failure flag is false.
+What I can explain line by line: Why the IP check runs before the widget check, and why a thrown confirmation still returns 201.
+
+Date: 2026-10-28
 Phase: 3, task 3.7 seed and runnable setup
 What I asked for: A seed command with two demo tenants, and a README a stranger can follow to boot the app.
 Where help was useful: `npm run seed` loads Northwind (`owner-a@example.com`, widget `demoAwidget1`) and Brightpath (`owner-b@example.com`, widget `demoBwidget1`), plus one enriched submission for Northwind. A second run printed the same tenant ids, `576695d7-66f5-4ff5-a58c-1514e241c569` and `fbd8c354-f706-4df7-9450-add61829c9ca`. `docker compose up -d` then `GET http://127.0.0.1:3010/health` returned `{ "ok": true, "db": "up" }`. Owner A saw 1 dashboard row and owner B saw 0. The customer page at `http://127.0.0.1:8080` rendered Join the list and, after submit, said Thanks. That widget then had 2 enriched rows.

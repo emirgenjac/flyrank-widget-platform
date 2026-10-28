@@ -6,8 +6,24 @@ Tick a box only when the proof under it is real command output. Empty slots stay
 
 ## Section 6, widget management
 
-- [ ] Authenticated CRUD for widgets. Requests without valid auth are rejected.
-  - Proof:
+- [x] Authenticated CRUD for widgets. Requests without valid auth are rejected.
+  - Proof: 2026-10-28, API on `http://127.0.0.1:3010`. Login for tenant `576695d7-66f5-4ff5-a58c-1514e241c569` returned a token. The created widget was deleted after the reads and the update.
+
+```text
+GET /widgets missing-auth 401 application/json; charset=utf-8 {"error":"unauthorized"}
+GET /widgets bad-token 401 application/json; charset=utf-8 {"error":"unauthorized"}
+POST /widgets missing-auth 401 application/json; charset=utf-8 {"error":"unauthorized"}
+POST /auth/login 200 tenant 576695d7-66f5-4ff5-a58c-1514e241c569 token true
+POST /widgets 201 id dc7f3002-aa08-44b8-8707-933d5ffa78ac public_id 0bKJb9FAepag title Evidence form one-line true
+GET /widgets 200 contains true
+GET /widgets/:id 200 title Evidence form tenant 576695d7-66f5-4ff5-a58c-1514e241c569
+PATCH /widgets/:id 200 title Evidence updated
+GET /widgets/:id/embed 200 one-line true
+PATCH /widgets/:id missing-auth 401 application/json; charset=utf-8 {"error":"unauthorized"}
+DELETE /widgets/:id missing-auth 401 application/json; charset=utf-8 {"error":"unauthorized"}
+DELETE /widgets/:id 204 body-length 0
+GET /widgets/:id after-delete 404 application/json; charset=utf-8 {"error":"not found"}
+```
 
 - [x] Tenant A cannot read or modify tenant B widgets or submissions.
   - Proof: 2026-10-28, API on `http://127.0.0.1:3000`. Tenant A is `f4ed0d3f-4f05-4efa-a3bf-66706b6e2ffd`. Tenant B is `cf4a7880-7a28-4ad9-8079-f9ec7a2049b0`. Widget `fb6d430c-ee35-45c8-9c10-e127daab2253` belongs to A. `GET /dashboard/submissions` is not built yet, so the submission lines are the owner filter `WHERE tenant_id = $1` from `src/data/ownerQueries.js`, run in Postgres. The proof widget and submission were deleted after these results.
@@ -137,16 +153,34 @@ honeypot_result pass
 confirmation sent submission=e46b6489-3b6f-4441-88ae-93633bc3e733
 ```
 
-- [ ] Malformed and oversized payloads are rejected with 4xx JSON errors. Neither returns 500.
-  - Proof:
+- [x] Malformed and oversized payloads are rejected with 4xx JSON errors. Neither returns 500.
+  - Proof: 2026-10-28, API on `http://127.0.0.1:3010`. Origin `http://127.0.0.1:8080`. The malformed body was `{`. The invalid body had a public id and a key that is not a UUID. The oversized body was valid JSON larger than 8 KiB.
+
+```text
+POST /submissions malformed 400 application/json; charset=utf-8 {"error":"invalid submission"}
+POST /submissions invalid 400 application/json; charset=utf-8 {"error":"invalid submission"}
+POST /submissions oversized 413 application/json; charset=utf-8 {"error":"payload too large"}
+```
 
 - [x] A valid submission is stored and linked to the right widget and tenant.
   - Proof: same request as the cross-origin transcript above. `201` id `e46b6489-3b6f-4441-88ae-93633bc3e733` is widget `89db14d2-29cd-4e29-b03c-e3cedae9add1`, tenant `f4ed0d3f-4f05-4efa-a3bf-66706b6e2ffd`, `geo_provider` `ip-api.com`, country `US`. That widget went from 1 stored row to 2.
 
 ## Section 6, abuse protection
 
-- [ ] A burst hits the per-IP limit and the per-widget limit with 429. A normal request right after still succeeds.
-  - Proof:
+- [x] A burst hits the per-IP limit and the per-widget limit with 429. A normal request right after still succeeds.
+  - Proof: 2026-10-28, API on `http://127.0.0.1:3010`. For the IP burst the running limit was 1 request per 10 seconds. The third request waited for that window. For the widget burst the running limit was 1 request per widget. The next request used `demoBwidget1` and did not wait. Both limits were then restored to 30 per IP and 60 per widget.
+
+```text
+POST /submissions demoAwidget1 201 {"ok":true,"id":"233d7d86-5deb-4ff9-be34-4fb216ceb0fc"}
+POST /submissions demoAwidget1 429 {"error":"too many requests"}
+POST /submissions demoAwidget1 201 {"ok":true,"id":"915a79d8-2094-4851-9605-cad0c97ecbec"}
+ip-summary 201 429 201
+
+POST /submissions demoAwidget1 201 {"ok":true,"id":"c91be97b-b58b-4c33-b0b0-b926712092c5"}
+POST /submissions demoAwidget1 429 {"error":"too many requests"}
+POST /submissions demoBwidget1 201 {"ok":true,"id":"f3c7629f-afda-4ab6-a990-31b782ef417d"}
+widget-summary 201 429 201
+```
 
 - [x] The honeypot blocks a spam submission and does not explain the rule.
   - Proof: 2026-10-28, API on `http://127.0.0.1:3000`. Widget `6eef7ad3-0f6e-4dcf-8028-5e4d79760d9a`. The request body included a non-empty reserved field. The response does not name the field or the rule. Postgres stored no row for that widget.
@@ -161,19 +195,54 @@ stored_rows 0
 
 ## Section 6, enrichment and safe side effects
 
-- [ ] Provider A is down, provider B answers, and the stored submission is enriched.
-  - Proof:
+- [x] Provider A is down, provider B answers, and the stored submission is enriched.
+  - Proof: 2026-10-28, API on `http://127.0.0.1:3010`. `GEO_MODE=mock`, `GEO_MOCK_A_DOWN=true`, `GEO_MOCK_B_DOWN=false`. Widget `demoAwidget1`.
 
-- [ ] Both providers are down. The submission still succeeds, without geo.
-  - Proof:
+```text
+POST /submissions demoAwidget1 201 {"ok":true,"id":"d7b2c3ce-285b-4566-8c43-5636344f1232"}
+geo_provider ipapi.co
+country_code DE
+country Germany
+city Berlin
+```
 
-- [ ] A failing confirmation email or webhook does not prevent the submission from being stored.
-  - Proof:
+- [x] Both providers are down. The submission still succeeds, without geo.
+  - Proof: 2026-10-28, same API. `GEO_MOCK_A_DOWN=true` and `GEO_MOCK_B_DOWN=true`. The response is 201 and the geo columns are null.
+
+```text
+POST /submissions demoAwidget1 201 {"ok":true,"id":"daa4d90c-89a6-499e-ab09-5cb44cee02ff"}
+geo_provider null
+geo null
+```
+
+- [x] A failing confirmation email or webhook does not prevent the submission from being stored.
+  - Proof: 2026-10-28, same API. `SIDE_EFFECT_FORCE_FAIL=true`. The HTTP response was already 201. The worker logged the alert after 3 attempts. The line has no recipient. The flags were restored afterward: geo mock down flags false, force fail false, IP limit 30, widget limit 60. Health then returned `{ "ok": true, "db": "up" }`.
+
+```text
+POST /submissions demoAwidget1 201 {"ok":true,"id":"fe80e263-2cf5-4852-a2a3-86487659d99e"}
+side effect failed submission=fe80e263-2cf5-4852-a2a3-86487659d99e attempts=3
+stored id fe80e263-2cf5-4852-a2a3-86487659d99e
+```
 
 ## Section 6, documentation
 
-- [ ] `README.md` has an architecture diagram, setup instructions, and API documentation. `capstone.yaml`, `EVIDENCE.md`, `BUILDLOG.md`, and `.env.example` are present.
-  - Proof:
+- [x] `README.md` has an architecture diagram, setup instructions, and API documentation. `capstone.yaml`, `EVIDENCE.md`, `BUILDLOG.md`, and `.env.example` are present.
+  - Proof: 2026-10-28. File sizes are bytes. The architecture section contains the one-line snippet.
+
+```text
+README.md 6252
+capstone.yaml 1073
+EVIDENCE.md 14086
+BUILDLOG.md 25587
+.env.example 1187
+## Setup
+## Architecture
+## Stack
+## API documentation
+## Limitations
+## Required files
+<script src="http://127.0.0.1:3010/widget.v1.js" data-widget-id="demoAwidget1"></script>
+```
 
 ## Acceptance probes
 
