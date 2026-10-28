@@ -52,14 +52,36 @@ submission tenant after B delete: f4ed0d3f-4f05-4efa-a3bf-66706b6e2ffd
 
 ## Section 6, public submission API
 
-- [ ] Cross-origin submissions work. CORS headers are correct, and `OPTIONS` preflight is handled.
-  - Proof:
+- [x] Cross-origin submissions work. CORS headers are correct, and `OPTIONS` preflight is handled.
+  - Proof: 2026-10-28. API origin `http://127.0.0.1:3000`. Request `Origin` is `https://customer.example`. Widget `mckICgybxZdo` (`89db14d2-29cd-4e29-b03c-e3cedae9add1`), tenant `f4ed0d3f-4f05-4efa-a3bf-66706b6e2ffd`. Submissions for that widget: 1 before, 2 after.
+
+```text
+OPTIONS /submissions 204
+access-control-allow-origin: https://customer.example
+access-control-allow-methods: POST, OPTIONS
+access-control-allow-headers: Content-Type
+vary: Origin
+
+POST /submissions 201 {"ok":true,"id":"e46b6489-3b6f-4441-88ae-93633bc3e733"}
+access-control-allow-origin: https://customer.example
+vary: Origin
+
+id e46b6489-3b6f-4441-88ae-93633bc3e733
+widget_id 89db14d2-29cd-4e29-b03c-e3cedae9add1
+tenant_id f4ed0d3f-4f05-4efa-a3bf-66706b6e2ffd
+geo_provider ip-api.com
+country_code US
+country United States
+city Ashburn
+honeypot_result pass
+confirmation sent submission=e46b6489-3b6f-4441-88ae-93633bc3e733
+```
 
 - [ ] Malformed and oversized payloads are rejected with 4xx JSON errors. Neither returns 500.
   - Proof:
 
-- [ ] A valid submission is stored and linked to the right widget and tenant.
-  - Proof:
+- [x] A valid submission is stored and linked to the right widget and tenant.
+  - Proof: same request as the cross-origin transcript above. `201` id `e46b6489-3b6f-4441-88ae-93633bc3e733` is widget `89db14d2-29cd-4e29-b03c-e3cedae9add1`, tenant `f4ed0d3f-4f05-4efa-a3bf-66706b6e2ffd`, `geo_provider` `ip-api.com`, country `US`. That widget went from 1 stored row to 2.
 
 ## Section 6, abuse protection
 
