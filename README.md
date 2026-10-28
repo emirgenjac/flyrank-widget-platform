@@ -6,16 +6,13 @@ This is a backend capstone. The public internet is the client: untrusted input, 
 
 ## Status
 
-Not runnable. There is no HTTP server yet. Phase 1 design is the one-page `DESIGN.md`. Widget, submission, tenant queries, embed payloads, and the route contracts are coded. `npm test` checks them. The server still does not listen.
+`docker compose up` starts the API and Postgres. `GET http://127.0.0.1:3000/health` returns `{ "ok": true, "db": "up" }` after the widget and submission migrations run. The contract routes, auth, and the customer page are not served yet. `npm run seed` does not exist yet. `capstone.yaml` stays `not_runnable` until those routes boot. `npm test` checks the logic.
 
-Intended commands, once Phase 2 and Phase 3 exist:
+`docker compose --profile mail up` also starts Mailpit. The plain `up` command does not.
 
 ```text
 docker compose up
-npm run seed
 ```
-
-Do not treat those commands as working today. `capstone.yaml` records the same intended contract and is marked `not_runnable`.
 
 ## Architecture
 

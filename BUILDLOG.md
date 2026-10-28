@@ -21,6 +21,14 @@ What I can explain line by line:
 ## Entries
 
 Date: 2026-10-28
+Phase: 2, task 2.1 Express and Compose
+What I asked for: Do the next task.
+Where help was useful: `src/main.js`, `src/http/app.js`, `src/data/migrate.js`, `src/jobs/runner.js`, and `docker-compose.yml`. `GET /health` returned `{ "ok": true, "db": "up" }`.
+Where it was wrong: The contract routes still 404. This boot is the process and the database, not a working widget.
+What I changed myself: I asked for the next task after the design gate.
+What I can explain line by line: Why Mailpit is behind a Compose profile, and why the API waits for Postgres before it listens.
+
+Date: 2026-10-28
 Phase: 1, task 1.7 design gate
 What I asked for: Do the next task, the one-page design gate.
 Where help was useful: `DESIGN.md` was cut from the long worksheet to one page. The column rules and route examples stay in the code files the page names.
