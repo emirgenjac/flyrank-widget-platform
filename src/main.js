@@ -4,8 +4,13 @@ import { createApp } from "./http/app.js";
 import { startJobs } from "./jobs/runner.js";
 
 const databaseUrl = process.env.DATABASE_URL;
+const tokenSecret = process.env.JWT_SECRET;
 if (!databaseUrl) {
   console.error("DATABASE_URL is required.");
+  process.exit(1);
+}
+if (!tokenSecret || tokenSecret.length < 16) {
+  console.error("JWT_SECRET is required.");
   process.exit(1);
 }
 
@@ -14,7 +19,7 @@ const pool = createPool(databaseUrl);
 
 await migrate(pool);
 const jobs = startJobs();
-const server = createApp({ db: pool }).listen(port, () => {
+const server = createApp({ db: pool, tokenSecret }).listen(port, () => {
   console.log(`api listening on ${port}`);
 });
 

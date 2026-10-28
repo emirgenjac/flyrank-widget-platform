@@ -4,6 +4,8 @@ import { CONFIG_CACHE_CONTROL, SCRIPT_CACHE_CONTROL } from "../logic/embed.js";
 import { contractById, contracts } from "./contracts.js";
 
 const requiredIds = [
+  "auth.register",
+  "auth.login",
   "widgets.create",
   "widgets.list",
   "widgets.read",

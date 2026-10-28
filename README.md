@@ -6,7 +6,7 @@ This is a backend capstone. The public internet is the client: untrusted input, 
 
 ## Status
 
-`docker compose up` starts the API and Postgres. `GET http://127.0.0.1:3000/health` returns `{ "ok": true, "db": "up" }` after the widget and submission migrations run. The contract routes, auth, and the customer page are not served yet. `npm run seed` does not exist yet. `capstone.yaml` stays `not_runnable` until those routes boot. `npm test` checks the logic.
+`docker compose up` starts the API and Postgres. `GET http://127.0.0.1:3000/health` returns `{ "ok": true, "db": "up" }` after migrations run. `POST /auth/register` and `POST /auth/login` issue a bearer token. Owner and dashboard paths reject a missing token with 401. The widget CRUD handlers are not built yet, so a valid token still gets 404 there. Public config and `POST /submissions` do not require a token. `npm run seed` does not exist yet. `capstone.yaml` stays `not_runnable` until those routes store data. `npm test` checks the logic.
 
 `docker compose --profile mail up` also starts Mailpit. The plain `up` command does not.
 

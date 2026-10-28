@@ -21,6 +21,14 @@ What I can explain line by line:
 ## Entries
 
 Date: 2026-10-28
+Phase: 2, task 2.3 auth
+What I asked for: Do the next task.
+Where help was useful: scrypt password hashes, HMAC bearer tokens, `POST /auth/register`, `POST /auth/login`, and the gate on owner and dashboard paths. A live register returned a token. `GET /widgets` without it was 401. The same call with the token was 404. Public config and `POST /submissions` stayed open.
+Where it was wrong: Widget CRUD is still the 404 behind the gate. The token is not a stored session.
+What I changed myself: I asked for the next task.
+What I can explain line by line: Why a wrong password and a missing user share the 401 body, and why `/widgets/:publicId/config` does not require a token.
+
+Date: 2026-10-28
 Phase: 2, task 2.2 users migration
 What I asked for: Do the next task.
 Where help was useful: `migrations/003_users.sql` adds `tenants.name` and `users` with a tenant foreign key, a unique lowercase email, and a password hash. The API applied it on startup.

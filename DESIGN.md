@@ -28,7 +28,7 @@ The snippet is `<script src="{origin}/widget.{version}.js" data-widget-id="{publ
 
 ## API
 
-`src/http/contracts.js` lists every route, with auth, status codes, and one example. Do not add paths beyond that file. Bearer routes take the tenant from the token. A missing or invalid token is 401. Public routes are `GET /widget.:version.js`, `GET /widgets/:publicId/config`, `OPTIONS /submissions`, and `POST /submissions`. Owner routes are widget CRUD and `GET /widgets/:id/embed`. Dashboard routes are `GET /dashboard/submissions` and `GET /dashboard/stats` (counts over time, per widget, and geo). `:id` is the widget uuid. `:publicId` is the snippet id. A stored submit is 201. Bad input is 4xx JSON, never 500. Oversized is 413. A burst is 429, and the next normal request still works.
+`src/http/contracts.js` lists every route, with auth, status codes, and one example. Do not add paths beyond that file. `POST /auth/register` and `POST /auth/login` are public and return a bearer token. Bearer routes take the tenant from that token. A missing or invalid token is 401. Public routes are the auth pair, `GET /widget.:version.js`, `GET /widgets/:publicId/config`, `OPTIONS /submissions`, and `POST /submissions`. Owner routes are widget CRUD and `GET /widgets/:id/embed`. Dashboard routes are `GET /dashboard/submissions` and `GET /dashboard/stats` (counts over time, per widget, and geo). `:id` is the widget uuid. `:publicId` is the snippet id. A stored submit is 201. Bad input is 4xx JSON, never 500. Oversized is 413. A burst is 429, and the next normal request still works.
 
 ## Failure behavior
 

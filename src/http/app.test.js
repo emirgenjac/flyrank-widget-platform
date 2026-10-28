@@ -40,7 +40,7 @@ test("health reports the database check", async () => {
 
 test("unknown routes return JSON 404", async () => {
   await withServer(createApp(), async (port) => {
-    const response = await fetch(`http://127.0.0.1:${port}/widgets`);
+    const response = await fetch(`http://127.0.0.1:${port}/nope`);
     assert.equal(response.status, 404);
     assert.deepEqual(await response.json(), { error: "not found" });
   });

@@ -49,7 +49,45 @@ const cors = {
   Vary: "Origin",
 };
 
+const userId = "55555555-5555-4555-8555-555555555555";
+
 export const contracts = [
+  {
+    id: "auth.register",
+    group: "public",
+    method: "POST",
+    path: "/auth/register",
+    auth: "none",
+    tenant: "created",
+    statuses: [201, 400, 409],
+    request: { name: "Acme", email: "ada@example.com", password: "correct-horse" },
+    responses: {
+      201: {
+        token: "<token>",
+        user: { id: userId, tenant_id: tenantId, email: "ada@example.com" },
+      },
+      400: { error: "invalid account" },
+      409: { error: "email taken" },
+    },
+  },
+  {
+    id: "auth.login",
+    group: "public",
+    method: "POST",
+    path: "/auth/login",
+    auth: "none",
+    tenant: "none",
+    statuses: [200, 400, 401],
+    request: { email: "ada@example.com", password: "correct-horse" },
+    responses: {
+      200: {
+        token: "<token>",
+        user: { id: userId, tenant_id: tenantId, email: "ada@example.com" },
+      },
+      400: { error: "invalid account" },
+      401: unauthorized,
+    },
+  },
   {
     id: "widgets.create",
     group: "owner",
