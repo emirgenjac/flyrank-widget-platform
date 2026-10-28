@@ -21,6 +21,14 @@ What I can explain line by line:
 ## Entries
 
 Date: 2026-10-29
+Phase: 4, task 4.1 Section 6 review
+What I asked for: A pass over every Section 6 box, ticking one only when the proof is real command output.
+Where help was useful: The PDF outline names the same six groups as this file: widget management, widget delivery, public submission API, abuse protection, enrichment and safe side effects, and documentation. `EVIDENCE.md` has 15 ticked boxes under those groups. Each tick has a transcript: status codes, cache headers, a stored id, or a file listing.
+Where it was wrong: The PDF body is stored as font glyphs, so the outline titles are the readable part. The box wording I compared is the wording in this file, which was taken from that PDF.
+What I changed myself: I reviewed the code and prompts. No tick was removed. No new transcript was required.
+What I can explain line by line: Why a box stays ticked only when a command result sits under it.
+
+Date: 2026-10-29
 Phase: 3, task 3.9 page and API origins
 What I asked for: The Phase 3 gate, with the widget rendering on the customer page and the two origins recorded.
 Where help was useful: The page at `http://127.0.0.1:8080` showed Join the list, an Email field, and Subscribe. Its script is `http://127.0.0.1:3010/widget.v1.js` for `demoAwidget1`. `GET /health` on that API origin returned `{ "ok": true, "db": "up" }`.
