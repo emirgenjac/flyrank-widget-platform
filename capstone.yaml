@@ -3,8 +3,8 @@
 status: not_runnable
 run: docker compose up
 seed: npm run seed
-# test is optional. A test suite is a stretch goal, not a Section 6 requirement.
-test:
+# npm test checks the widget model only. The acceptance suite is still a stretch goal.
+test: npm test
 base_url: http://localhost:3000
 endpoints:
   - method: POST

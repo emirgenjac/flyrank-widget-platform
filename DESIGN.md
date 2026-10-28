@@ -1,6 +1,6 @@
 # Design worksheet
 
-This is not the Phase 1 design document yet. It records decisions that are already locked. Open sections are the Phase 1 tasks in `AGENTS.md`. Do not start application code until the Phase 1 gate is met: this file is a single page of finished design, and it is committed only when a commit is requested.
+This is not the Phase 1 design document yet. It records decisions that are already locked. Filled sections are done. Open sections are the remaining Phase 1 tasks in `AGENTS.md`. Do not start application code until the Phase 1 gate is met: this file is a single page of finished design. When that gate is met, give Emir a commit message. Do not commit it.
 
 Source of truth: `Lead-Capture Platform Live Capstone.pdf`. Section 6 is required in full. Section 8 sets the order. Section 7 is where to stop.
 
@@ -28,34 +28,102 @@ Open: _not chosen yet._
 
 ## Widget model
 
-Open. Phase 1 fills fields, types, and nullability.
+Table `widgets`. One row is one widget owned by one tenant. The server generates `id` and `public_id`. The owner cannot send either, and cannot change `tenant_id` after create.
 
-Required concepts, not a finished schema:
+| Column | Type | Null | Rule |
+| --- | --- | --- | --- |
+| `id` | uuid | not null | Primary key. Submissions reference this. |
+| `public_id` | text | not null | Unique. 12 chars from `A-Za-z0-9`. This is the snippet id. |
+| `tenant_id` | uuid | not null | Foreign key to `tenants`. Immutable. |
+| `type` | text | not null | `signup`, `cta`, or `popover`. |
+| `title` | text | not null | 1 to 120 characters. |
+| `description` | text | null | Optional copy. When set, 1 to 500 characters. |
+| `fields` | jsonb | not null | Array of field objects. Default `[]`. At most 8. |
+| `button_text` | text | not null | 1 to 40 characters. |
+| `display_options` | jsonb | not null | Object. Always stored with `placement` and `theme`. |
+| `created_at` | timestamptz | not null | Set by the database on insert. |
+| `updated_at` | timestamptz | not null | Set by the database on insert and update. |
 
-- Type: `signup`, `cta`, or `popover`. One or two types are enough to implement if the model can hold the others.
-- Title, description, form fields, button text, display options.
-- Tenant id.
-- Public id used by the embed snippet.
-- Unique public id index.
+`fields` items are objects, not free-form JSON:
+
+| Key | Type | Null | Rule |
+| --- | --- | --- | --- |
+| `name` | text | not null | 1 to 40 chars. `a-z`, digits, underscore. Unique inside the widget. |
+| `label` | text | not null | 1 to 80 characters. |
+| `input_type` | text | not null | `email`, `text`, or `tel`. |
+| `required` | boolean | not null | Owner sets this. |
+
+`type` decides whether `fields` may be empty:
+
+- `signup`: at least one field, and one of them has `input_type` `email`.
+- `cta` and `popover`: empty is allowed. The same field rules apply when fields are present.
+
+`display_options` has two keys. Both are stored, so the public config does not invent defaults.
+
+| Key | Type | Null | Rule |
+| --- | --- | --- | --- |
+| `placement` | text | not null | `inline`, `bottom-right`, or `center`. |
+| `theme` | text | not null | `light` or `dark`. |
+
+If the owner omits them, the server stores `placement` `inline` for `signup` and `cta`, `bottom-right` for `popover`, and `theme` `light`.
+
+The honeypot is not a widget column and not an owner field. The script adds a reserved input named `company_website`. Creating a field with that name is a 4xx. Page targeting, delay, and once-per-visitor are stretch goals, so they are not keys in `display_options`.
+
+`src/logic/widget.js` checks this on input. `migrations/001_widgets.sql` checks it again in the database. A before-update trigger rejects changes to `id`, `public_id`, `tenant_id`, and `created_at`, and sets `updated_at`. The `tenants` table in that migration is only the foreign key target. Users and submissions are later migrations.
 
 ## Submission model
 
-Open. Phase 1 fills fields, types, and nullability.
+Table `submissions`. One row is one accepted visitor submission. The server generates `id` and `created_at`. The visitor never sends `widget_id`, `tenant_id`, `client_ip`, or `geo`. A filled honeypot does not insert a row.
 
-Required concepts, not a finished schema:
+The request body is JSON, at most 8 KiB. A larger body is 413. Malformed JSON is 400. Both are JSON errors, never 500.
 
-- Validated payload.
-- Widget id and tenant id.
-- Client IP.
-- Nullable geo (country and city). Missing geo is a valid stored row.
-- Honeypot result.
-- Idempotency key, unique.
-- Timestamps.
-- Index for submissions by widget and time.
+| Request field | Type | Null | Rule |
+| --- | --- | --- | --- |
+| `public_id` | text | not null | 12 characters from `A-Za-z0-9`. Resolved to `widgets.id`. Unknown id is 404. |
+| `idempotency_key` | uuid | not null | Client generated. The same key must not store a second row. |
+| `fields` | object | not null | Keys are that widget's field names. Values are strings, trimmed, 1 to 500 characters. |
+| `company_website` | text | null | Omitted or empty is a pass. Any other value is not stored. |
+
+`fields` must include every widget field marked required. An `email` input must contain one `@` and no spaces. Unknown keys are 400. An optional empty string is dropped, not stored.
+
+| Column | Type | Null | Rule |
+| --- | --- | --- | --- |
+| `id` | uuid | not null | Primary key. |
+| `widget_id` | uuid | not null | Foreign key to `widgets.id`. Immutable. |
+| `tenant_id` | uuid | not null | Foreign key to `tenants.id`. Must equal that widget's tenant. Immutable. |
+| `payload` | jsonb | not null | The validated `fields` object only. |
+| `client_ip` | inet | not null | Taken from the connection. An IP in the body is ignored. |
+| `geo` | jsonb | null | Null when both providers fail. The row is still stored. |
+| `geo_provider` | text | null | `ip-api.com` or `ipapi.co`. Null only when `geo` is null. |
+| `honeypot_result` | text | not null | Stored value is always `pass`. A filled honeypot never becomes a row. |
+| `idempotency_key` | uuid | not null | Unique. |
+| `created_at` | timestamptz | not null | Set by the database on insert. |
+
+There is no `updated_at`. A stored submission does not change.
+
+When `geo` is present it has this shape. `city` may be null. The other two keys may not.
+
+| Key | Type | Null | Rule |
+| --- | --- | --- | --- |
+| `country_code` | text | not null | Two letters. |
+| `country` | text | not null | 1 to 80 characters. |
+| `city` | text | null | When set, 1 to 80 characters. |
+
+The same `idempotency_key` and the same `public_id` plus the same `fields` returns the existing row and does not send another email. The same key with a different widget or different `fields` is 409.
+
+`src/logic/submission.js` checks the request. `migrations/002_submissions.sql` stores the row. A filled `company_website` returns a drop result with no explanation. The database rejects updates.
 
 ## Tenancy and indexes
 
-Open. Phase 1 names each index and states which owner queries must include the tenant filter.
+Owner reads go through `src/data/ownerQueries.js`. Every statement there has `WHERE tenant_id = $1`. A missing tenant id throws before a query exists.
+
+| Index | Where | Purpose |
+| --- | --- | --- |
+| Unique `widgets.public_id` | `001_widgets.sql` | Snippet id |
+| `widgets (tenant_id)` | `001_widgets.sql` | Owner widget list |
+| Unique `submissions.idempotency_key` | `002_submissions.sql` | One row per retry key |
+| `submissions (widget_id, created_at)` | `002_submissions.sql` | Submissions for one widget, newest last in the index order |
+| `submissions (tenant_id)` | `002_submissions.sql` | Owner submission list |
 
 ## Embed flow
 

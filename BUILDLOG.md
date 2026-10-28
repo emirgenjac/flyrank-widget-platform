@@ -20,6 +20,38 @@ What I can explain line by line:
 
 ## Entries
 
+Date: 2026-10-28
+Phase: 1, tasks 1.2 and 1.3 in code
+What I asked for: Stop leaving tasks as markdown only. Code the submission model, then the tenant queries and indexes.
+Where help was useful: `src/logic/submission.js`, `migrations/002_submissions.sql`, and `src/data/ownerQueries.js`. `npm test` passed 26 checks.
+Where it was wrong: The SQL has not been applied. Docker is installed, and the engine was not running.
+What I changed myself: I asked for code per task instead of another design-only pass.
+What I can explain line by line: Why a filled reserved field returns `action: "drop"` with no message, and why every owner query starts with `tenant_id = $1`.
+
+Date: 2026-10-28
+Phase: 1, task 1.2 submission model
+What I asked for: Run the widget tests. If they passed, write the next task, the submission model.
+Where help was useful: `npm test` passed 12 checks. The `submissions` table, the request fields, and the retry rule are now in `DESIGN.md`.
+Where it was wrong: This is a draft, not a migration. Postgres has not checked these columns.
+What I changed myself: I have not edited the draft yet. I still need to accept it before task 1.3.
+What I can explain line by line: Why `geo` may be null, why a filled `company_website` stores nothing, and why the same idempotency key does not insert twice.
+
+Date: 2026-10-28
+Phase: 1, task 1.1 widget model code
+What I asked for: Code the widget model from the design. No HTTP server.
+Where help was useful: Zod checks in `src/logic/widget.js`, the Postgres constraints in `migrations/001_widgets.sql`, and `npm test`.
+Where it was wrong: Nothing in the request path yet. A passing unit test is not a stored row until Postgres is running.
+What I changed myself: I asked for this to be coded before the rest of the design page is finished.
+What I can explain line by line: Why signup requires an email field, why `company_website` is rejected without calling it a honeypot, and why `tenant_id` cannot change.
+
+Date: 2026-10-28
+Phase: 1, task 1.1 widget model
+What I asked for: Fill the widget fields, types, and nullability in `DESIGN.md`. No application code.
+Where help was useful: The `widgets` table, the `fields` object, and the two `display_options` keys.
+Where it was wrong: It is a draft, not a migration. Nothing has been checked against Postgres.
+What I changed myself: Not yet. I still need to accept or edit the draft before task 1.2 counts as started.
+What I can explain line by line: Why `public_id` is separate from `id`, why `description` is nullable, why `signup` requires an email field, and why the honeypot is not a widget column.
+
 Date: 2026-10-27
 Phase: skeleton, before Phase 1
 What I asked AI to do: Turn the capstone brief into a local repo skeleton and an ordered task list. No application code.
