@@ -21,6 +21,14 @@ What I can explain line by line:
 ## Entries
 
 Date: 2026-10-28
+Phase: 3, task 3.2 public widget config
+What I asked for: The public widget config as a small payload with a short cache.
+Where help was useful: `GET /widgets/:publicId/config` needs no token. The body is the embed config: public id, type, title, description, fields, button text, display options, and submit URL. `Cache-Control` is `public, max-age=60`. A foreign Origin is echoed. The tenant id and the widget uuid are absent. The live widget `mckICgybxZdo` returned 289 bytes. A missing public id was 404 with no cache header.
+Where it was wrong: Caching a missing widget for 60 seconds would hide a widget created just after that. The short cache is only on the 200 response.
+What I changed myself: I reviewed the code and prompts.
+What I can explain line by line: Why this route uses the public id, and why the response leaves out the tenant id.
+
+Date: 2026-10-28
 Phase: 3, task 3.1 versioned widget script
 What I asked for: The widget script at a versioned URL with a long cache.
 Where help was useful: `GET /widget.v1.js` returns the bundle with `Cache-Control: public, max-age=31536000, immutable`. The response body starts with the version token. `GET /widget.v2.js` is 404 while the app version is v1, and the reverse is true when the token is v2. The same token is the one in the embed snippet. The API on port 3000 returned that pair.

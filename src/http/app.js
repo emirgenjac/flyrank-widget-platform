@@ -6,6 +6,7 @@ import { createRateLimiter } from "../logic/rateLimit.js";
 import { authGate } from "./authGate.js";
 import { registerAuthRoutes } from "./authRoutes.js";
 import { applySubmissionCors, registerSubmissionRoutes, submissionCors } from "./submissionRoutes.js";
+import { registerConfigRoute } from "./configRoute.js";
 import { registerScriptRoute } from "./scriptRoute.js";
 import { registerWidgetRoutes } from "./widgetRoutes.js";
 
@@ -43,19 +44,20 @@ export function createApp({
   });
 
   const version = assetVersion ?? process.env.WIDGET_ASSET_VERSION ?? "v1";
+  const baseUrl = publicBaseUrl ?? process.env.WIDGET_PUBLIC_BASE_URL ?? "http://localhost:3000";
+  const widgetRepo = widgets ?? (db ? createWidgetRepository(db) : null);
+  const findPublic = findWidgetByPublicId ?? widgetRepo?.findByPublicId ?? null;
   registerAuthRoutes(app, { db, tokenSecret });
   registerScriptRoute(app, { assetVersion: version });
+  registerConfigRoute(app, { findWidgetByPublicId: findPublic, publicBaseUrl: baseUrl });
   app.use(authGate(tokenSecret));
-  const widgetRepo = widgets ?? (db ? createWidgetRepository(db) : null);
   registerWidgetRoutes(app, {
     widgets: widgetRepo,
-    publicBaseUrl: publicBaseUrl ?? process.env.WIDGET_PUBLIC_BASE_URL ?? "http://localhost:3000",
+    publicBaseUrl: baseUrl,
     assetVersion: version,
   });
   registerSubmissionRoutes(app, {
-    findWidgetByPublicId: findWidgetByPublicId
-      ?? widgetRepo?.findByPublicId
-      ?? null,
+    findWidgetByPublicId: findPublic,
     submissions: submissions ?? (db ? createSubmissionRepository(db) : null),
     rateLimit: createRateLimiter(rateLimit ?? {
       ipMax: 30,

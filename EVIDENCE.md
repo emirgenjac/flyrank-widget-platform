@@ -41,8 +41,19 @@ submission tenant after B delete: f4ed0d3f-4f05-4efa-a3bf-66706b6e2ffd
 - [ ] An embed snippet is generated per widget.
   - Proof:
 
-- [ ] The public config endpoint serves a small payload with `Cache-Control` and a `max-age`.
-  - Proof:
+- [x] The public config endpoint serves a small payload with `Cache-Control` and a `max-age`.
+  - Proof: 2026-10-28. Widget `mckICgybxZdo`. Request `Origin` is `https://customer.example`. The body is 289 bytes and has no tenant id. A missing public id is 404 and is not cached.
+
+```text
+GET /widgets/mckICgybxZdo/config 200
+cache-control: public, max-age=60
+access-control-allow-origin: https://customer.example
+vary: Origin
+{"id":"mckICgybxZdo","type":"signup","title":"Geo check","description":null,"fields":[{"name":"email","label":"Email","input_type":"email","required":true}],"button_text":"Subscribe","display_options":{"placement":"inline","theme":"light"},"submit_url":"http://localhost:3000/submissions"}
+
+GET /widgets/missing12345/config 404
+cache-control: absent
+```
 
 - [x] Widget JavaScript is served as a versioned bundle. A new version uses a new URL or a cache-bust.
   - Proof: 2026-10-28, API on `http://127.0.0.1:3000`. The running version token is `v1`.
