@@ -1,6 +1,7 @@
 import express from "express";
 import { createSubmissionRepository } from "../data/submissions.js";
 import { createWidgetRepository } from "../data/widgets.js";
+import { createRateLimiter } from "../logic/rateLimit.js";
 import { authGate } from "./authGate.js";
 import { registerAuthRoutes } from "./authRoutes.js";
 import { applySubmissionCors, registerSubmissionRoutes, submissionCors } from "./submissionRoutes.js";
@@ -12,6 +13,7 @@ export function createApp({
   widgets,
   findWidgetByPublicId,
   submissions,
+  rateLimit,
   publicBaseUrl,
   assetVersion,
 } = {}) {
@@ -46,6 +48,12 @@ export function createApp({
       ?? widgetRepo?.findByPublicId
       ?? null,
     submissions: submissions ?? (db ? createSubmissionRepository(db) : null),
+    rateLimit: createRateLimiter(rateLimit ?? {
+      ipMax: 30,
+      ipWindowMs: 60_000,
+      widgetMax: 60,
+      widgetWindowMs: 60_000,
+    }),
   });
 
   app.use((req, res) => {

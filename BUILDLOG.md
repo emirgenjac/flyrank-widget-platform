@@ -21,6 +21,22 @@ What I can explain line by line:
 ## Entries
 
 Date: 2026-10-28
+Phase: 2, task 2.9 reserved field
+What I asked for: A filled reserved field is not stored, and the response does not name the rule.
+Where help was useful: `POST /submissions` returned 200 `{ "ok": true }`. The body did not contain the field name or the submitted value. Postgres counted 0 rows for widget `6eef7ad3-0f6e-4dcf-8028-5e4d79760d9a`. The transcript is in `EVIDENCE.md`.
+Where it was wrong: The earlier check used an in-memory store. This pass checked the live database.
+What I changed myself: I reviewed the code and prompts.
+What I can explain line by line: Why a non-empty reserved field returns before `storeSubmission`, and why the response body is only `{ "ok": true }`.
+
+Date: 2026-10-28
+Phase: 2, task 2.8 rate limits
+What I asked for: Per-IP and per-widget submission limits that return 429, while a request still inside its limit succeeds.
+Where help was useful: `POST /submissions` counts the connection IP and, once the widget is known, that widget. The over-limit response is 429 `{ "error": "too many requests" }` and the row is not stored. A different widget still stores during the same window. After the window, the same IP stores again. The limits are read from the environment.
+Where it was wrong: The running API uses 30 requests per IP and 60 per widget each minute, so a short manual burst under those numbers still succeeds. The proof uses a lower limit in the test process.
+What I changed myself: I reviewed the code and prompts.
+What I can explain line by line: Why the body cannot choose the IP that is counted, and why a full bucket for one widget does not block another widget.
+
+Date: 2026-10-28
 Phase: 2, task 2.7 store a submission
 What I asked for: Store one submission per idempotency key, linked to the widget and tenant.
 Where help was useful: A valid `POST /submissions` inserts one row linked to the widget and its tenant. The same idempotency key and payload returns that row with 200. A different payload, or the same key on another widget, returns 409 and does not insert again. Geo stays null until the provider chain exists.

@@ -2,6 +2,7 @@ import { createPool } from "./data/db.js";
 import { migrate } from "./data/migrate.js";
 import { createApp } from "./http/app.js";
 import { startJobs } from "./jobs/runner.js";
+import { readRateLimitConfig } from "./logic/rateLimit.js";
 
 const databaseUrl = process.env.DATABASE_URL;
 const tokenSecret = process.env.JWT_SECRET;
@@ -19,7 +20,11 @@ const pool = createPool(databaseUrl);
 
 await migrate(pool);
 const jobs = startJobs();
-const server = createApp({ db: pool, tokenSecret }).listen(port, () => {
+const server = createApp({
+  db: pool,
+  tokenSecret,
+  rateLimit: readRateLimitConfig(process.env),
+}).listen(port, () => {
   console.log(`api listening on ${port}`);
 });
 

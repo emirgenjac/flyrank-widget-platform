@@ -66,8 +66,16 @@ submission tenant after B delete: f4ed0d3f-4f05-4efa-a3bf-66706b6e2ffd
 - [ ] A burst hits the per-IP limit and the per-widget limit with 429. A normal request right after still succeeds.
   - Proof:
 
-- [ ] The honeypot blocks a spam submission and does not explain the rule.
-  - Proof:
+- [x] The honeypot blocks a spam submission and does not explain the rule.
+  - Proof: 2026-10-28, API on `http://127.0.0.1:3000`. Widget `6eef7ad3-0f6e-4dcf-8028-5e4d79760d9a`. The request body included a non-empty reserved field. The response does not name the field or the rule. Postgres stored no row for that widget.
+
+```text
+submit 200 body {"ok":true}
+names honeypot false
+names company_website false
+names spam false
+stored_rows 0
+```
 
 ## Section 6, enrichment and safe side effects
 

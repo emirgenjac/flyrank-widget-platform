@@ -52,6 +52,10 @@ function errorBody(status) {
   return "invalid submission";
 }
 
+function tooMany(res) {
+  res.status(429).json({ error: "too many requests" });
+}
+
 export function submissionCors(req, res, next) {
   applySubmissionCors(req, res);
   if (req.method === "OPTIONS") {
@@ -61,9 +65,13 @@ export function submissionCors(req, res, next) {
   next();
 }
 
-export function registerSubmissionRoutes(app, { findWidgetByPublicId, submissions } = {}) {
+export function registerSubmissionRoutes(app, { findWidgetByPublicId, submissions, rateLimit } = {}) {
   app.post("/submissions", async (req, res) => {
     const clientIp = connectionIp(req);
+    if (rateLimit && !rateLimit.allowIp(clientIp)) {
+      tooMany(res);
+      return;
+    }
     const publicId = req.body && typeof req.body === "object" && !Array.isArray(req.body)
       ? req.body.public_id
       : undefined;
@@ -75,6 +83,10 @@ export function registerSubmissionRoutes(app, { findWidgetByPublicId, submission
         res.status(503).json({ error: "unavailable" });
         return;
       }
+    }
+    if (widget && rateLimit && !rateLimit.allowWidget(widget.id)) {
+      tooMany(res);
+      return;
     }
 
     const result = parseSubmission({ body: req.body, widget, clientIp });
