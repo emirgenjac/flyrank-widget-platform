@@ -244,6 +244,22 @@ BUILDLOG.md 25587
 <script src="http://127.0.0.1:3010/widget.v1.js" data-widget-id="demoAwidget1"></script>
 ```
 
+## Phase 3 gate
+
+- [x] The widget renders on the second-origin page. The page origin and the API origin are different.
+  - Proof: 2026-10-29. The customer page showed Join the list, Weekly notes, an Email field, and Subscribe. The script on that page points at the API. `GET /health` on the API origin returned `{ "ok": true, "db": "up" }`.
+
+```text
+page http://127.0.0.1:8080
+api http://127.0.0.1:3010
+script http://127.0.0.1:3010/widget.v1.js
+widget demoAwidget1
+title Join the list
+email true
+button Subscribe
+health 200 {"ok":true,"db":"up"}
+```
+
 ## Acceptance probes
 
 - [ ] Probe 1. `POST` a valid submission from the second-origin test page. It is stored, the status is 2xx, and it is visible through the dashboard API.

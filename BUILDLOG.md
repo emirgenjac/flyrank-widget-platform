@@ -20,6 +20,14 @@ What I can explain line by line:
 
 ## Entries
 
+Date: 2026-10-29
+Phase: 3, task 3.9 page and API origins
+What I asked for: The Phase 3 gate, with the widget rendering on the customer page and the two origins recorded.
+Where help was useful: The page at `http://127.0.0.1:8080` showed Join the list, an Email field, and Subscribe. Its script is `http://127.0.0.1:3010/widget.v1.js` for `demoAwidget1`. `GET /health` on that API origin returned `{ "ok": true, "db": "up" }`.
+Where it was wrong: An earlier render proof in `EVIDENCE.md` still names API port 3000. That transcript matches the API port from that session. This gate records the current pair, 8080 and 3010.
+What I changed myself: I reviewed the code and prompts.
+What I can explain line by line: Why the page origin and the script origin are different hosts, and why the form is built from the public config.
+
 Date: 2026-10-28
 Phase: 3, task 3.8 Section 6 proofs
 What I asked for: One real command proof for every Section 6 box.
