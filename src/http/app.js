@@ -2,11 +2,20 @@ import express from "express";
 import { createWidgetRepository } from "../data/widgets.js";
 import { authGate } from "./authGate.js";
 import { registerAuthRoutes } from "./authRoutes.js";
+import { applySubmissionCors, registerSubmissionRoutes, submissionCors } from "./submissionRoutes.js";
 import { registerWidgetRoutes } from "./widgetRoutes.js";
 
-export function createApp({ db, tokenSecret, widgets, publicBaseUrl, assetVersion } = {}) {
+export function createApp({
+  db,
+  tokenSecret,
+  widgets,
+  findWidgetByPublicId,
+  publicBaseUrl,
+  assetVersion,
+} = {}) {
   const app = express();
   app.disable("x-powered-by");
+  app.use("/submissions", submissionCors);
   app.use(express.json({ limit: "8kb" }));
 
   app.get("/health", async (req, res) => {
@@ -24,10 +33,16 @@ export function createApp({ db, tokenSecret, widgets, publicBaseUrl, assetVersio
 
   registerAuthRoutes(app, { db, tokenSecret });
   app.use(authGate(tokenSecret));
+  const widgetRepo = widgets ?? (db ? createWidgetRepository(db) : null);
   registerWidgetRoutes(app, {
-    widgets: widgets ?? (db ? createWidgetRepository(db) : null),
+    widgets: widgetRepo,
     publicBaseUrl: publicBaseUrl ?? process.env.WIDGET_PUBLIC_BASE_URL ?? "http://localhost:3000",
     assetVersion: assetVersion ?? process.env.WIDGET_ASSET_VERSION ?? "v1",
+  });
+  registerSubmissionRoutes(app, {
+    findWidgetByPublicId: findWidgetByPublicId
+      ?? widgetRepo?.findByPublicId
+      ?? null,
   });
 
   app.use((req, res) => {
@@ -35,12 +50,16 @@ export function createApp({ db, tokenSecret, widgets, publicBaseUrl, assetVersio
   });
 
   app.use((error, req, res, next) => {
+    if (req.path === "/submissions") {
+      applySubmissionCors(req, res);
+    }
     if (error?.type === "entity.too.large") {
       res.status(413).json({ error: "payload too large" });
       return;
     }
     if (error instanceof SyntaxError && Object.hasOwn(error, "body")) {
-      res.status(400).json({ error: "invalid json" });
+      const errorName = req.path === "/submissions" ? "invalid submission" : "invalid json";
+      res.status(400).json({ error: errorName });
       return;
     }
     next(error);

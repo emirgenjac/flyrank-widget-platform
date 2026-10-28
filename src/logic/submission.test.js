@@ -106,6 +106,15 @@ test("an empty reserved input is still accepted", () => {
   assert.equal(result.value.client_ip, "::1");
 });
 
+test("a malformed body is a 400 before widget lookup", () => {
+  const result = parseSubmission({
+    body: { nope: true },
+    widget: null,
+    clientIp: "203.0.113.10",
+  });
+  assert.deepEqual(result, { ok: false, status: 400 });
+});
+
 test("an unknown widget is a 404", () => {
   const result = parseSubmission({
     body: body({ email: "ada@example.com" }),

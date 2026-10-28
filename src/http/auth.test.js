@@ -52,7 +52,8 @@ test("owner routes reject a missing token and accept a valid one", async () => {
     const config = await fetch(`http://127.0.0.1:${port}/widgets/abcDEF123456/config`);
     assert.equal(config.status, 404);
     const submit = await fetch(`http://127.0.0.1:${port}/submissions`, { method: "POST" });
-    assert.equal(submit.status, 404);
+    assert.equal(submit.status, 400);
+    assert.deepEqual(await submit.json(), { error: "invalid submission" });
   });
 });
 

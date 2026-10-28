@@ -21,6 +21,14 @@ What I can explain line by line:
 ## Entries
 
 Date: 2026-10-28
+Phase: 2, task 2.6 submission HTTP
+What I asked for: Do the next task.
+Where help was useful: `OPTIONS /submissions` returns 204 with the CORS headers, and echoes the request `Origin`. Malformed JSON is 400 `{ "error": "invalid submission" }`. An oversized body is 413 `{ "error": "payload too large" }`. An unknown public id is 404. A filled `company_website` returns `{ "ok": true }` and the body does not name the rule.
+Where it was wrong: A valid submission returns 503 `{ "error": "unavailable" }` because the row is not stored yet. That status is not in the submission contract. Storage is the next task.
+What I changed myself: I asked for the next task.
+What I can explain line by line: Why the allowed origin is the caller's `Origin`, and why a bad JSON object is 400 before the widget lookup.
+
+Date: 2026-10-28
 Phase: 2, task 2.5 isolation proof
 What I asked for: Do the next task.
 Where help was useful: Two live tenants. Tenant B received 404 for read, patch, delete, and embed of tenant A's widget, and an empty list. A stored submission for A was invisible to B's `WHERE tenant_id = $1` queries. B's insert was rejected with `tenant_id must match the widget`. B's update and delete changed 0 rows. The transcript is in `EVIDENCE.md`.

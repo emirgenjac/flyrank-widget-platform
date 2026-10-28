@@ -1,3 +1,4 @@
+import { PUBLIC_ID_PATTERN } from "../logic/widget.js";
 import {
   findWidgetForOwnerSql,
   listWidgetsSql,
@@ -31,6 +32,17 @@ export async function listWidgets(db, tenantId) {
   const query = listWidgetsSql(tenantId);
   const result = await db.query(query.text, query.values);
   return result.rows;
+}
+
+export async function findWidgetByPublicId(db, publicId) {
+  if (typeof publicId !== "string" || !PUBLIC_ID_PATTERN.test(publicId)) {
+    return null;
+  }
+  const result = await db.query(
+    `SELECT ${widgetColumns} FROM widgets WHERE public_id = $1`,
+    [publicId],
+  );
+  return result.rows[0] ?? null;
 }
 
 export async function findWidget(db, tenantId, widgetId) {
@@ -81,6 +93,7 @@ export function createWidgetRepository(db) {
     insert: (row) => insertWidget(db, row),
     list: (tenantId) => listWidgets(db, tenantId),
     find: (tenantId, widgetId) => findWidget(db, tenantId, widgetId),
+    findByPublicId: (publicId) => findWidgetByPublicId(db, publicId),
     update: (tenantId, widgetId, widget) => updateWidget(db, tenantId, widgetId, widget),
     remove: (tenantId, widgetId) => deleteWidget(db, tenantId, widgetId),
   };

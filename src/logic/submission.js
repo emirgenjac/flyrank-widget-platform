@@ -56,9 +56,6 @@ export function parseSubmissionJson(raw) {
 }
 
 export function parseSubmission({ body, widget, clientIp }) {
-  if (!widget) {
-    return failure(404);
-  }
   if (isIP(clientIp) === 0) {
     return failure(400);
   }
@@ -75,7 +72,7 @@ export function parseSubmission({ body, widget, clientIp }) {
   if (!parsed.success) {
     return failure(400);
   }
-  if (parsed.data.public_id !== widget.public_id) {
+  if (!widget || parsed.data.public_id !== widget.public_id) {
     return failure(404);
   }
 
