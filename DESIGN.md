@@ -137,39 +137,26 @@ Owner reads go through `src/data/ownerQueries.js`. Every statement there has `WH
 
 ## API contracts
 
-Open. Phase 1 writes method, path, auth, status codes, and a short request and response example for each route below. Do not invent new routes in Phase 3.
+`src/http/contracts.js` is the route list. Each entry has the method, path, auth, status codes, and a short request and response example. Phase 2 and Phase 3 use these paths. They do not add new ones.
 
-### Owner path: widget management
+Bearer routes take the tenant from the token. A missing or invalid token is 401 `{ "error": "unauthorized" }`. Public routes do not use auth.
 
-- Authenticated CRUD for widgets.
-- Missing or invalid auth is rejected.
-- Responses are limited to the caller's tenant.
+| Method | Path | Auth | Statuses |
+| --- | --- | --- | --- |
+| POST | `/widgets` | bearer | 201, 400, 401 |
+| GET | `/widgets` | bearer | 200, 401 |
+| GET | `/widgets/:id` | bearer | 200, 401, 404 |
+| PATCH | `/widgets/:id` | bearer | 200, 400, 401, 404 |
+| DELETE | `/widgets/:id` | bearer | 204, 401, 404 |
+| GET | `/widgets/:id/embed` | bearer | 200, 401, 404 |
+| GET | `/widget.:version.js` | none | 200, 404 |
+| GET | `/widgets/:publicId/config` | none | 200, 404 |
+| OPTIONS | `/submissions` | none | 204 |
+| POST | `/submissions` | none | 200, 201, 400, 404, 409, 413, 429 |
+| GET | `/dashboard/submissions` | bearer | 200, 401 |
+| GET | `/dashboard/stats` | bearer | 200, 401 |
 
-### Public path: delivery
-
-- One-line embed snippet per widget.
-- Versioned widget JavaScript with a long cache lifetime.
-- Public config with a short `Cache-Control` max-age and a small payload.
-- CORS allowed for the customer page origin.
-
-### Public path: submission
-
-- `OPTIONS /submissions` answers the preflight.
-- `POST /submissions` accepts a cross-origin form post.
-- Malformed body: 4xx JSON.
-- Oversized body: 4xx JSON (413).
-- Rate limit exceeded: 429, then a normal request still works.
-- Honeypot filled: not stored, and the body does not reveal why.
-- Success: 2xx, row linked to the widget and tenant, geo attached when a provider answers.
-
-### Owner path: dashboard
-
-- Authenticated.
-- Tenant scoped, including submissions.
-- List submissions.
-- Counts over time.
-- Per-widget stats.
-- Geo breakdown.
+`:id` is the widget uuid. `:publicId` is the 12 character snippet id. The script cache header is `public, max-age=31536000, immutable`. The config cache header is `public, max-age=60`. `POST /submissions` returns 201 when a row is stored, 200 `{ "ok": true }` when the reserved input is filled, 409 when the idempotency key is reused with different fields, 413 when the body is over 8 KiB, and 429 when a limit is exceeded. `GET /dashboard/stats` returns `counts_over_time`, `widgets`, and `geo`.
 
 ## Phase 1 gate
 

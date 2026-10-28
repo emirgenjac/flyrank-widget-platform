@@ -21,6 +21,14 @@ What I can explain line by line:
 ## Entries
 
 Date: 2026-10-28
+Phase: 1, task 1.5 API contracts
+What I asked for: Do the next task.
+Where help was useful: `src/http/contracts.js` locks the method, path, auth, status codes, and one example per route. `npm test` passed 34 checks.
+Where it was wrong: These are contracts, not a listening server. Calling the paths now will fail because Express is not built.
+What I changed myself: I asked for the next task after the embed flow.
+What I can explain line by line: Why a missing token is 401 on owner and dashboard routes, and why a filled reserved field is 200 with `{ "ok": true }` and no explanation.
+
+Date: 2026-10-28
 Phase: 1, task 1.4 embed flow
 What I asked for: Start the next task in code.
 Where help was useful: `src/logic/embed.js` builds the snippet, the versioned script URL, the small config, the form, and the submit body. `npm test` passed 29 checks.
