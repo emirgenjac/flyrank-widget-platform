@@ -47,7 +47,12 @@ test("owner routes reject a missing token and accept a valid one", async () => {
     const allowed = await fetch(`http://127.0.0.1:${port}/dashboard/stats`, {
       headers: { authorization: `Bearer ${token}` },
     });
-    assert.equal(allowed.status, 404);
+    assert.equal(allowed.status, 200);
+    assert.deepEqual(await allowed.json(), {
+      counts_over_time: [],
+      widgets: [],
+      geo: [],
+    });
 
     const config = await fetch(`http://127.0.0.1:${port}/widgets/abcDEF123456/config`);
     assert.equal(config.status, 404);

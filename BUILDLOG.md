@@ -21,6 +21,14 @@ What I can explain line by line:
 ## Entries
 
 Date: 2026-10-28
+Phase: 3, task 3.6 dashboard
+What I asked for: An authenticated dashboard for the submission list, counts over time, per-widget stats, and a geo breakdown.
+Where help was useful: `GET /dashboard/submissions` and `GET /dashboard/stats` take the tenant from the bearer token. A missing token is 401. Tenant A saw submission `6015efec-06d2-4ed0-be45-b76aae4cb2a7`. Tenant B saw no rows. The list leaves out the client IP and the idempotency key. Counts are grouped by UTC date. The stats query on the older tenant returned 4 rows on 2026-10-28, widget `mckICgybxZdo` count 3, and geo `US` count 3.
+Where it was wrong: The proof server for the new tenant did not run the geo lookup, so that one dashboard row has a null country. The geo query itself still groups a null country separately from `US`.
+What I changed myself: I reviewed the code and prompts.
+What I can explain line by line: Why both dashboard queries filter with `WHERE tenant_id = $1`, and why a widget with no submissions can still appear in the per-widget counts.
+
+Date: 2026-10-28
 Phase: 3, task 3.5 widget form on the customer page
 What I asked for: The widget form and submit button on the customer page, loaded from the snippet.
 Where help was useful: `customer-site/index.html` now has the one script line for widget `mckICgybxZdo`. The page origin is `http://127.0.0.1:8080` and the script origin is `http://127.0.0.1:3000`. The browser showed Geo check, an Email field, and Subscribe. After submit the page said Thanks. The widget's submission count went from 2 to 3, and the new row is enriched by `ip-api.com`.

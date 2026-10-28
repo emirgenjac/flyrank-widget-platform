@@ -49,3 +49,46 @@ export function listSubmissionsByWidgetSql(tenantId, widgetId) {
     values: [requireTenantId(tenantId), requireWidgetId(widgetId)],
   };
 }
+
+export function dashboardSubmissionsSql(tenantId) {
+  return {
+    text: `SELECT id, widget_id, tenant_id, payload, geo, created_at
+      FROM submissions
+      WHERE tenant_id = $1
+      ORDER BY created_at DESC`,
+    values: [requireTenantId(tenantId)],
+  };
+}
+
+export function dashboardCountsSql(tenantId) {
+  return {
+    text: `SELECT to_char(created_at AT TIME ZONE 'UTC', 'YYYY-MM-DD') AS date, count(*)::int AS count
+      FROM submissions
+      WHERE tenant_id = $1
+      GROUP BY 1
+      ORDER BY 1 ASC`,
+    values: [requireTenantId(tenantId)],
+  };
+}
+
+export function dashboardWidgetsSql(tenantId) {
+  return {
+    text: `SELECT id AS widget_id, public_id,
+        (SELECT count(*)::int FROM submissions WHERE tenant_id = $1 AND widget_id = widgets.id) AS count
+      FROM widgets
+      WHERE tenant_id = $1
+      ORDER BY count DESC, public_id ASC`,
+    values: [requireTenantId(tenantId)],
+  };
+}
+
+export function dashboardGeoSql(tenantId) {
+  return {
+    text: `SELECT geo->>'country_code' AS country_code, count(*)::int AS count
+      FROM submissions
+      WHERE tenant_id = $1
+      GROUP BY 1
+      ORDER BY count DESC, country_code ASC NULLS LAST`,
+    values: [requireTenantId(tenantId)],
+  };
+}

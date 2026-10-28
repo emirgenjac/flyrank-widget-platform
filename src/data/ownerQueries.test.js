@@ -2,6 +2,10 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
 import {
+  dashboardCountsSql,
+  dashboardGeoSql,
+  dashboardSubmissionsSql,
+  dashboardWidgetsSql,
   findWidgetForOwnerSql,
   listSubmissionsByWidgetSql,
   listSubmissionsSql,
@@ -27,6 +31,10 @@ test("every owner query filters by tenant id", () => {
     findWidgetForOwnerSql(tenantId, widgetId),
     listSubmissionsSql(tenantId),
     listSubmissionsByWidgetSql(tenantId, widgetId),
+    dashboardSubmissionsSql(tenantId),
+    dashboardCountsSql(tenantId),
+    dashboardWidgetsSql(tenantId),
+    dashboardGeoSql(tenantId),
   ];
   for (const query of queries) {
     assert.match(query.text, /WHERE tenant_id = \$1/);

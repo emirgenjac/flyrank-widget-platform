@@ -1,4 +1,5 @@
 import express from "express";
+import { createDashboardRepository } from "../data/dashboard.js";
 import { createSubmissionRepository } from "../data/submissions.js";
 import { createWidgetRepository } from "../data/widgets.js";
 import { createLogger } from "../logic/logging.js";
@@ -7,12 +8,14 @@ import { authGate } from "./authGate.js";
 import { registerAuthRoutes } from "./authRoutes.js";
 import { applySubmissionCors, registerSubmissionRoutes, submissionCors } from "./submissionRoutes.js";
 import { registerConfigRoute } from "./configRoute.js";
+import { registerDashboardRoutes } from "./dashboardRoutes.js";
 import { registerScriptRoute } from "./scriptRoute.js";
 import { registerWidgetRoutes } from "./widgetRoutes.js";
 
 export function createApp({
   db,
   tokenSecret,
+  dashboard,
   widgets,
   findWidgetByPublicId,
   submissions,
@@ -67,6 +70,9 @@ export function createApp({
     }),
     geo: geo ?? null,
     jobs: jobs ?? null,
+  });
+  registerDashboardRoutes(app, {
+    dashboard: dashboard ?? (db ? createDashboardRepository(db) : null),
   });
 
   if (typeof mount === "function") {

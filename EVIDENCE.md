@@ -36,6 +36,26 @@ widget title after B writes: Join the list, tenant f4ed0d3f-4f05-4efa-a3bf-66706
 submission tenant after B delete: f4ed0d3f-4f05-4efa-a3bf-66706b6e2ffd
 ```
 
+Dashboard read, same day. Tenant A `7b8769ac-14b3-415a-9d0b-46ed3e6c8267` stored submission `6015efec-06d2-4ed0-be45-b76aae4cb2a7`. Tenant B `2a0704a8-6c63-4c55-b88e-23d9edc03eab` listed nothing. A missing token is 401.
+
+```text
+A GET /dashboard/submissions 200 count 1 id 6015efec-06d2-4ed0-be45-b76aae4cb2a7 tenant 7b8769ac-14b3-415a-9d0b-46ed3e6c8267
+A GET /dashboard/stats 200 date 2026-10-28 count 1 widget GNHaiIm4O7Wk count 1 geo country_code null count 1
+B GET /dashboard/submissions 200 count 0
+B GET /dashboard/stats 200 widgets [] geo []
+GET /dashboard/submissions without a token 401
+```
+
+Stats query for the older tenant `f4ed0d3f-4f05-4efa-a3bf-66706b6e2ffd`:
+
+```text
+counts 2026-10-28 count 4
+widget mckICgybxZdo count 3
+widget aFC44gyZ54ZY count 1
+geo US count 3
+geo null count 1
+```
+
 ## Section 6, widget delivery
 
 - [x] An embed snippet is generated per widget.
