@@ -21,6 +21,14 @@ What I can explain line by line:
 ## Entries
 
 Date: 2026-10-28
+Phase: 2, task 2.4 widget CRUD
+What I asked for: Do the next task.
+Where help was useful: `POST`, `GET`, `PATCH`, and `DELETE /widgets`, plus `GET /widgets/:id/embed`. The tenant id comes from the token. A second tenant gets 404 for the same widget id. Create returns the one-line embed snippet.
+Where it was wrong: Delete of a widget that already has submissions is 409. The first contract only listed 204, 401, and 404. I kept 409 so that case is not a 500.
+What I changed myself: I asked for the next task.
+What I can explain line by line: Why `tenant_id` in the body is 400, and why list and read both use `WHERE tenant_id = $1`.
+
+Date: 2026-10-28
 Phase: 2, task 2.3 auth
 What I asked for: Do the next task.
 Where help was useful: scrypt password hashes, HMAC bearer tokens, `POST /auth/register`, `POST /auth/login`, and the gate on owner and dashboard paths. A live register returned a token. `GET /widgets` without it was 401. The same call with the token was 404. Public config and `POST /submissions` stayed open.

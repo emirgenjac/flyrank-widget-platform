@@ -1,8 +1,6 @@
 import { verifyToken } from "../logic/auth.js";
 import { PUBLIC_ID_PATTERN } from "../logic/widget.js";
 
-const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-
 export function isPublicRequest(req) {
   if (req.path === "/health" || req.path === "/auth/register" || req.path === "/auth/login" || req.path === "/submissions") {
     return true;
@@ -26,11 +24,10 @@ export function isProtectedRequest(req) {
   if (req.path === "/dashboard" || req.path.startsWith("/dashboard/")) {
     return true;
   }
-  if (req.path === "/widgets") {
+  if (req.path === "/widgets" || req.path.startsWith("/widgets/")) {
     return true;
   }
-  const match = req.path.match(/^\/widgets\/([^/]+)(\/embed)?$/);
-  return Boolean(match && UUID_PATTERN.test(match[1]));
+  return false;
 }
 
 export function authGate(tokenSecret) {

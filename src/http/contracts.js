@@ -155,12 +155,13 @@ export const contracts = [
     path: "/widgets/:id",
     auth: "bearer",
     tenant: "token",
-    statuses: [204, 401, 404],
+    statuses: [204, 401, 404, 409],
     request: null,
     responses: {
       204: null,
       401: unauthorized,
       404: notFound,
+      409: { error: "widget has submissions" },
     },
   },
   {
