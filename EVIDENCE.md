@@ -38,8 +38,17 @@ submission tenant after B delete: f4ed0d3f-4f05-4efa-a3bf-66706b6e2ffd
 
 ## Section 6, widget delivery
 
-- [ ] An embed snippet is generated per widget.
-  - Proof:
+- [x] An embed snippet is generated per widget.
+  - Proof: 2026-10-28. Port 3000 was already in use, so this API listened on `http://127.0.0.1:3010`. Create and `GET /widgets/:id/embed` returned the same one-line snippet. That script URL returned 200 with the long cache.
+
+```text
+POST /widgets 201
+GET /widgets/:id/embed 200
+<script src="http://127.0.0.1:3010/widget.v1.js" data-widget-id="6a4S9xP4LRHb"></script>
+one line: true
+GET /widget.v1.js 200
+cache-control: public, max-age=31536000, immutable
+```
 
 - [x] The public config endpoint serves a small payload with `Cache-Control` and a `max-age`.
   - Proof: 2026-10-28. Widget `mckICgybxZdo`. Request `Origin` is `https://customer.example`. The body is 289 bytes and has no tenant id. A missing public id is 404 and is not cached.

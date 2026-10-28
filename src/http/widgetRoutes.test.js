@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { createServer } from "node:http";
 import test from "node:test";
 import { signToken } from "../logic/auth.js";
+import { embedSnippet } from "../logic/embed.js";
 import { createApp } from "./app.js";
 
 const secret = "test-secret-value-ok";
@@ -90,8 +91,11 @@ test("widget CRUD stays inside the token tenant", async () => {
     assert.equal(created.status, 201);
     const widget = await created.json();
     assert.equal(widget.tenant_id, tenantA);
-    assert.match(widget.embed, /data-widget-id="/);
-    assert.equal(widget.embed.includes(widget.public_id), true);
+    const snippet = embedSnippet("http://localhost:3000", "v1", widget.public_id);
+    assert.equal(widget.embed, snippet);
+    assert.equal(widget.embed.includes("\n"), false);
+    assert.equal(widget.embed.includes("/widget.v1.js"), true);
+    assert.equal(widget.embed.includes(`data-widget-id="${widget.public_id}"`), true);
 
     const other = await fetch(`${base}/widgets/${widget.id}`, { headers: auth(tenantB) });
     assert.equal(other.status, 404);
@@ -109,6 +113,8 @@ test("widget CRUD stays inside the token tenant", async () => {
     const embed = await fetch(`${base}/widgets/${widget.id}/embed`, { headers: auth(tenantA) });
     assert.equal(embed.status, 200);
     assert.equal((await embed.json()).embed, widget.embed);
+    const otherEmbed = await fetch(`${base}/widgets/${widget.id}/embed`, { headers: auth(tenantB) });
+    assert.equal(otherEmbed.status, 404);
 
     const removed = await fetch(`${base}/widgets/${widget.id}`, { method: "DELETE", headers: auth(tenantA) });
     assert.equal(removed.status, 204);

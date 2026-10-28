@@ -21,6 +21,14 @@ What I can explain line by line:
 ## Entries
 
 Date: 2026-10-28
+Phase: 3, task 3.3 embed snippet
+What I asked for: One embed line per widget, pointing at the versioned script and the widget id.
+Where help was useful: Create and `GET /widgets/:id/embed` already returned that line. The check now requires the exact one-line snippet: `src` is `/widget.v1.js` and `data-widget-id` is the public id. Another tenant's embed request is 404. A live create returned `<script src="http://127.0.0.1:3010/widget.v1.js" data-widget-id="6a4S9xP4LRHb"></script>`, and that URL returned the cached script.
+Where it was wrong: Port 3000 was already in use, so the proof listened on port 3010. The snippet origin follows the API origin used for that process.
+What I changed myself: I reviewed the code and prompts.
+What I can explain line by line: Why the snippet is one script tag, and why the public id is the `data-widget-id` value.
+
+Date: 2026-10-28
 Phase: 3, task 3.2 public widget config
 What I asked for: The public widget config as a small payload with a short cache.
 Where help was useful: `GET /widgets/:publicId/config` needs no token. The body is the embed config: public id, type, title, description, fields, button text, display options, and submit URL. `Cache-Control` is `public, max-age=60`. A foreign Origin is echoed. The tenant id and the widget uuid are absent. The live widget `mckICgybxZdo` returned 289 bytes. A missing public id was 404 with no cache header.
