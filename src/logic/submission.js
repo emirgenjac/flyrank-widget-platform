@@ -162,3 +162,33 @@ export function matchIdempotentSubmission(existing, incoming) {
     && samePayload(existing.payload, incoming.payload);
   return same ? "replay" : "conflict";
 }
+
+async function decideStoredSubmission(repo, incoming) {
+  const existing = await repo.findByIdempotencyKey(incoming.idempotency_key);
+  const decision = matchIdempotentSubmission(existing, incoming);
+  if (decision === "replay") {
+    return { outcome: "replay", id: existing.id };
+  }
+  if (decision === "conflict") {
+    return { outcome: "conflict" };
+  }
+  return null;
+}
+
+export async function storeSubmission(repo, accepted) {
+  const incoming = toSubmissionInsert(accepted);
+  const ready = await decideStoredSubmission(repo, incoming);
+  if (ready) {
+    return ready;
+  }
+  try {
+    const row = await repo.insert(incoming);
+    return { outcome: "insert", id: row.id };
+  } catch (error) {
+    if (error?.code !== "23505") {
+      throw error;
+    }
+    const again = await decideStoredSubmission(repo, incoming);
+    return again ?? { outcome: "conflict" };
+  }
+}

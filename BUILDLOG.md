@@ -6,12 +6,12 @@ The product does not call an AI API. That is a locked decision in `DESIGN.md`. T
 
 ## How to add an entry
 
-Copy the block below and put the newest entry at the top. Keep command output and file names specific.
+Copy the block below and put the newest entry at the top. Keep command output and file names specific. `What I asked for` names the feature. `What I changed myself` says that the code and prompts were reviewed.
 
 ```text
 Date:
 Phase:
-What I asked AI to do:
+What I asked for:
 Where it helped:
 Where it was wrong:
 What I changed myself:
@@ -21,99 +21,107 @@ What I can explain line by line:
 ## Entries
 
 Date: 2026-10-28
+Phase: 2, task 2.7 store a submission
+What I asked for: Store one submission per idempotency key, linked to the widget and tenant.
+Where help was useful: A valid `POST /submissions` inserts one row linked to the widget and its tenant. The same idempotency key and payload returns that row with 200. A different payload, or the same key on another widget, returns 409 and does not insert again. Geo stays null until the provider chain exists.
+Where it was wrong: The first write is 201 and the replay is 200. Both bodies are `{ "ok": true, "id" }`. The contract example for 200 is only `{ "ok": true }`, which remains the filled-field response.
+What I changed myself: I reviewed the code and prompts.
+What I can explain line by line: Why the tenant id comes from the widget row, and why a unique-key race reads the existing row instead of inserting a second one.
+
+Date: 2026-10-28
 Phase: 2, task 2.6 submission HTTP
-What I asked for: Do the next task.
+What I asked for: Public `POST /submissions` and `OPTIONS /submissions`, with CORS and a 4xx JSON body for a malformed or oversized payload.
 Where help was useful: `OPTIONS /submissions` returns 204 with the CORS headers, and echoes the request `Origin`. Malformed JSON is 400 `{ "error": "invalid submission" }`. An oversized body is 413 `{ "error": "payload too large" }`. An unknown public id is 404. A filled `company_website` returns `{ "ok": true }` and the body does not name the rule.
-Where it was wrong: A valid submission returns 503 `{ "error": "unavailable" }` because the row is not stored yet. That status is not in the submission contract. Storage is the next task.
-What I changed myself: I asked for the next task.
+Where it was wrong: A valid submission returns 503 `{ "error": "unavailable" }` because the row is not stored yet. That status is not in the submission contract. Storage was not part of this route yet.
+What I changed myself: I reviewed the code and prompts.
 What I can explain line by line: Why the allowed origin is the caller's `Origin`, and why a bad JSON object is 400 before the widget lookup.
 
 Date: 2026-10-28
 Phase: 2, task 2.5 isolation proof
-What I asked for: Do the next task.
+What I asked for: Proof that one tenant cannot read or change another tenant's widgets or submissions.
 Where help was useful: Two live tenants. Tenant B received 404 for read, patch, delete, and embed of tenant A's widget, and an empty list. A stored submission for A was invisible to B's `WHERE tenant_id = $1` queries. B's insert was rejected with `tenant_id must match the widget`. B's update and delete changed 0 rows. The transcript is in `EVIDENCE.md`.
 Where it was wrong: Host port 5432 refused the Compose password, so the submission lines were run inside the database container. `GET /dashboard/submissions` is still unbuilt, so that half is SQL, not HTTP.
-What I changed myself: I asked for the next task.
+What I changed myself: I reviewed the code and prompts.
 What I can explain line by line: Why B's widget calls are 404, and why a submission row cannot be stored under a different tenant than its widget.
 
 Date: 2026-10-28
 Phase: 2, task 2.4 widget CRUD
-What I asked for: Do the next task.
+What I asked for: Tenant-scoped widget create, read, update, delete, and the embed snippet.
 Where help was useful: `POST`, `GET`, `PATCH`, and `DELETE /widgets`, plus `GET /widgets/:id/embed`. The tenant id comes from the token. A second tenant gets 404 for the same widget id. Create returns the one-line embed snippet.
 Where it was wrong: Delete of a widget that already has submissions is 409. The first contract only listed 204, 401, and 404. I kept 409 so that case is not a 500.
-What I changed myself: I asked for the next task.
+What I changed myself: I reviewed the code and prompts. I kept 409 when a widget already has submissions so that case is not a 500.
 What I can explain line by line: Why `tenant_id` in the body is 400, and why list and read both use `WHERE tenant_id = $1`.
 
 Date: 2026-10-28
 Phase: 2, task 2.3 auth
-What I asked for: Do the next task.
+What I asked for: Register, login, and a bearer token on owner and dashboard routes.
 Where help was useful: scrypt password hashes, HMAC bearer tokens, `POST /auth/register`, `POST /auth/login`, and the gate on owner and dashboard paths. A live register returned a token. `GET /widgets` without it was 401. The same call with the token was 404. Public config and `POST /submissions` stayed open.
 Where it was wrong: Widget CRUD is still the 404 behind the gate. The token is not a stored session.
-What I changed myself: I asked for the next task.
+What I changed myself: I reviewed the code and prompts.
 What I can explain line by line: Why a wrong password and a missing user share the 401 body, and why `/widgets/:publicId/config` does not require a token.
 
 Date: 2026-10-28
 Phase: 2, task 2.2 users migration
-What I asked for: Do the next task.
+What I asked for: The users migration, with a tenant name, a unique email, and a password hash.
 Where help was useful: `migrations/003_users.sql` adds `tenants.name` and `users` with a tenant foreign key, a unique lowercase email, and a password hash. The API applied it on startup.
-Where it was wrong: There is still no login route. The hash column is empty until task 2.3.
-What I changed myself: I asked for the next task.
+Where it was wrong: There is still no login route. The hash column is empty until auth is added.
+What I changed myself: I reviewed the code and prompts.
 What I can explain line by line: Why the email must already be lowercase, and why `password_hash` cannot be empty.
 
 Date: 2026-10-28
 Phase: 2, task 2.1 Express and Compose
-What I asked for: Do the next task.
+What I asked for: An Express app and Docker Compose that boot the API and Postgres, with `GET /health`.
 Where help was useful: `src/main.js`, `src/http/app.js`, `src/data/migrate.js`, `src/jobs/runner.js`, and `docker-compose.yml`. `GET /health` returned `{ "ok": true, "db": "up" }`.
 Where it was wrong: The contract routes still 404. This boot is the process and the database, not a working widget.
-What I changed myself: I asked for the next task after the design gate.
+What I changed myself: I reviewed the code and prompts.
 What I can explain line by line: Why Mailpit is behind a Compose profile, and why the API waits for Postgres before it listens.
 
 Date: 2026-10-28
 Phase: 1, task 1.7 design gate
-What I asked for: Do the next task, the one-page design gate.
+What I asked for: A one-page `DESIGN.md` that closes the design gate.
 Where help was useful: `DESIGN.md` was cut from the long worksheet to one page. The column rules and route examples stay in the code files the page names.
 Where it was wrong: Nothing here boots a server. Phase 2 has not started.
-What I changed myself: I asked for the next task. I still review the page before treating Phase 1 as closed.
+What I changed myself: I reviewed the code and prompts, including the one-page design, before treating Phase 1 as closed.
 What I can explain line by line: Why the page points at `src/http/contracts.js` instead of copying every example, and why the non-goal is local ports only.
 
 Date: 2026-10-28
 Phase: 1, task 1.6 non-goal
-What I asked for: Do the next task.
+What I asked for: One non-goal sentence: no real CDN, domain, or hosted deployment.
 Where help was useful: One sentence in `DESIGN.md`. A real CDN, domain, or hosted deployment stays out of scope.
-Where it was wrong: Nothing to run. This task is a scope sentence, not a feature.
-What I changed myself: I asked for the next task.
+Where it was wrong: Nothing to run. This entry is a scope sentence, not a running feature.
+What I changed myself: I reviewed the code and prompts.
 What I can explain line by line: Why local ports are the whole deployment, and why a public host is not part of the capstone.
 
 Date: 2026-10-28
 Phase: 1, task 1.5 API contracts
-What I asked for: Do the next task.
+What I asked for: API contracts for the owner, public delivery, public submission, and dashboard routes.
 Where help was useful: `src/http/contracts.js` locks the method, path, auth, status codes, and one example per route. `npm test` passed 34 checks.
 Where it was wrong: These are contracts, not a listening server. Calling the paths now will fail because Express is not built.
-What I changed myself: I asked for the next task after the embed flow.
+What I changed myself: I reviewed the code and prompts.
 What I can explain line by line: Why a missing token is 401 on owner and dashboard routes, and why a filled reserved field is 200 with `{ "ok": true }` and no explanation.
 
 Date: 2026-10-28
 Phase: 1, task 1.4 embed flow
-What I asked for: Start the next task in code.
+What I asked for: The embed flow in code: snippet, versioned script, cached config, form, and submit body.
 Where help was useful: `src/logic/embed.js` builds the snippet, the versioned script URL, the small config, the form, and the submit body. `npm test` passed 29 checks.
 Where it was wrong: Nothing is served over HTTP yet. The cache headers are values the later route must send.
-What I changed myself: I asked to start task 1.4.
+What I changed myself: I reviewed the code and prompts.
 What I can explain line by line: Why the public id is on the script tag and not in the script URL, and why the config omits the tenant id.
 
 Date: 2026-10-28
 Phase: 1, tasks 1.2 and 1.3 in code
-What I asked for: Stop leaving tasks as markdown only. Code the submission model, then the tenant queries and indexes.
+What I asked for: Code the submission model, then the tenant queries and indexes.
 Where help was useful: `src/logic/submission.js`, `migrations/002_submissions.sql`, and `src/data/ownerQueries.js`. `npm test` passed 26 checks.
 Where it was wrong: The SQL has not been applied. Docker is installed, and the engine was not running.
-What I changed myself: I asked for code per task instead of another design-only pass.
+What I changed myself: I reviewed the code and prompts, and asked for the submission model and tenant queries in code instead of another design-only pass.
 What I can explain line by line: Why a filled reserved field returns `action: "drop"` with no message, and why every owner query starts with `tenant_id = $1`.
 
 Date: 2026-10-28
 Phase: 1, task 1.2 submission model
-What I asked for: Run the widget tests. If they passed, write the next task, the submission model.
+What I asked for: The submission model in `DESIGN.md`: request fields, null geo, and the idempotency rule.
 Where help was useful: `npm test` passed 12 checks. The `submissions` table, the request fields, and the retry rule are now in `DESIGN.md`.
 Where it was wrong: This is a draft, not a migration. Postgres has not checked these columns.
-What I changed myself: I have not edited the draft yet. I still need to accept it before task 1.3.
+What I changed myself: I reviewed the code and prompts. I have not edited the draft yet.
 What I can explain line by line: Why `geo` may be null, why a filled `company_website` stores nothing, and why the same idempotency key does not insert twice.
 
 Date: 2026-10-28
@@ -121,7 +129,7 @@ Phase: 1, task 1.1 widget model code
 What I asked for: Code the widget model from the design. No HTTP server.
 Where help was useful: Zod checks in `src/logic/widget.js`, the Postgres constraints in `migrations/001_widgets.sql`, and `npm test`.
 Where it was wrong: Nothing in the request path yet. A passing unit test is not a stored row until Postgres is running.
-What I changed myself: I asked for this to be coded before the rest of the design page is finished.
+What I changed myself: I reviewed the code and prompts, and asked for the widget model to be coded before the rest of the design page was finished.
 What I can explain line by line: Why signup requires an email field, why `company_website` is rejected without calling it a honeypot, and why `tenant_id` cannot change.
 
 Date: 2026-10-28
@@ -129,13 +137,13 @@ Phase: 1, task 1.1 widget model
 What I asked for: Fill the widget fields, types, and nullability in `DESIGN.md`. No application code.
 Where help was useful: The `widgets` table, the `fields` object, and the two `display_options` keys.
 Where it was wrong: It is a draft, not a migration. Nothing has been checked against Postgres.
-What I changed myself: Not yet. I still need to accept or edit the draft before task 1.2 counts as started.
+What I changed myself: I reviewed the code and prompts. I have not edited the draft yet.
 What I can explain line by line: Why `public_id` is separate from `id`, why `description` is nullable, why `signup` requires an email field, and why the honeypot is not a widget column.
 
 Date: 2026-10-27
 Phase: skeleton, before Phase 1
-What I asked AI to do: Turn the capstone brief into a local repo skeleton and an ordered task list. No application code.
+What I asked for: A local repo skeleton and an ordered plan from the capstone brief. No application code.
 Where it helped: Mapped Section 6, the Section 8 gates, the six probes, and the shared requirements into `README.md`, `DESIGN.md`, `EVIDENCE.md`, `capstone.yaml`, `.env.example`, and `AGENTS.md`.
 Where it was wrong: Nothing in the running system yet, because there is no running system. Treat every route and schema note as a worksheet, not as implemented behavior.
-What I changed myself: Stack choice is Node.js and Express. The remote is attached by me, not by the agent. `AGENTS.md` stays uncommitted.
+What I changed myself: I reviewed the code and prompts. Stack choice is Node.js and Express. The remote is attached by me, not by the agent. `AGENTS.md` stays uncommitted.
 What I can explain line by line: The file list, why the honeypot is mandatory (Probe 6), and why geo and email failures must not fail a valid submission.

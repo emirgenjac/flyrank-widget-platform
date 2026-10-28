@@ -1,4 +1,5 @@
 import express from "express";
+import { createSubmissionRepository } from "../data/submissions.js";
 import { createWidgetRepository } from "../data/widgets.js";
 import { authGate } from "./authGate.js";
 import { registerAuthRoutes } from "./authRoutes.js";
@@ -10,6 +11,7 @@ export function createApp({
   tokenSecret,
   widgets,
   findWidgetByPublicId,
+  submissions,
   publicBaseUrl,
   assetVersion,
 } = {}) {
@@ -43,6 +45,7 @@ export function createApp({
     findWidgetByPublicId: findWidgetByPublicId
       ?? widgetRepo?.findByPublicId
       ?? null,
+    submissions: submissions ?? (db ? createSubmissionRepository(db) : null),
   });
 
   app.use((req, res) => {

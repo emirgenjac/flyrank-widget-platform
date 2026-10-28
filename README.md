@@ -6,7 +6,7 @@ This is a backend capstone. The public internet is the client: untrusted input, 
 
 ## Status
 
-`docker compose up` starts the API and Postgres. `GET http://127.0.0.1:3000/health` returns `{ "ok": true, "db": "up" }` after migrations run. `POST /auth/register` and `POST /auth/login` issue a bearer token. Owner widget CRUD stores rows for that token's tenant. A missing token is 401. Another tenant's widget id is 404. `OPTIONS /submissions` and `POST /submissions` are public. A malformed or oversized body is 4xx JSON. A valid submission is not stored yet. `npm run seed` does not exist yet. `capstone.yaml` stays `not_runnable` until submissions store data. `npm test` checks the logic.
+`docker compose up` starts the API and Postgres. `GET http://127.0.0.1:3000/health` returns `{ "ok": true, "db": "up" }` after migrations run. `POST /auth/register` and `POST /auth/login` issue a bearer token. Owner widget CRUD stores rows for that token's tenant. A missing token is 401. Another tenant's widget id is 404. `OPTIONS /submissions` and `POST /submissions` are public. A malformed or oversized body is 4xx JSON. A valid submission is stored once for that widget and tenant. The same idempotency key returns the existing row, and a different payload is 409. `npm run seed` does not exist yet. `capstone.yaml` stays `not_runnable` until the seed command and the rest of the public path exist. `npm test` checks the logic.
 
 `docker compose --profile mail up` also starts Mailpit. The plain `up` command does not.
 

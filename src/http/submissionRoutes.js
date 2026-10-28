@@ -1,4 +1,4 @@
-import { parseSubmission } from "../logic/submission.js";
+import { parseSubmission, storeSubmission } from "../logic/submission.js";
 import { PUBLIC_ID_PATTERN } from "../logic/widget.js";
 
 const METHODS = "POST, OPTIONS";
@@ -61,7 +61,7 @@ export function submissionCors(req, res, next) {
   next();
 }
 
-export function registerSubmissionRoutes(app, { findWidgetByPublicId } = {}) {
+export function registerSubmissionRoutes(app, { findWidgetByPublicId, submissions } = {}) {
   app.post("/submissions", async (req, res) => {
     const clientIp = connectionIp(req);
     const publicId = req.body && typeof req.body === "object" && !Array.isArray(req.body)
@@ -86,7 +86,20 @@ export function registerSubmissionRoutes(app, { findWidgetByPublicId } = {}) {
       res.status(result.status).json({ error: errorBody(result.status) });
       return;
     }
+    if (!submissions) {
+      res.status(503).json({ error: "unavailable" });
+      return;
+    }
 
-    res.status(503).json({ error: "unavailable" });
+    try {
+      const stored = await storeSubmission(submissions, result.value);
+      if (stored.outcome === "conflict") {
+        res.status(409).json({ error: "idempotency conflict" });
+        return;
+      }
+      res.status(stored.outcome === "insert" ? 201 : 200).json({ ok: true, id: stored.id });
+    } catch {
+      res.status(503).json({ error: "unavailable" });
+    }
   });
 }
