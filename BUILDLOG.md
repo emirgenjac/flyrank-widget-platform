@@ -21,6 +21,14 @@ What I can explain line by line:
 ## Entries
 
 Date: 2026-10-29
+Phase: 4, task 4.2 acceptance probes
+What I asked for: The six acceptance probes, run in order, with each result pasted into `EVIDENCE.md`.
+Where help was useful: The page at `http://127.0.0.1:8080` posted to `http://127.0.0.1:3010/submissions` and got 201. The page said Thanks. The owner dashboard listed `51e06afa-5461-4ef8-ad04-1cbde33417eb` for tenant `576695d7-66f5-4ff5-a58c-1514e241c569`, city Ashburn. Malformed JSON was 400 and the oversized body was 413. An IP burst returned 429, then the next window stored a row. A second request to `demoAwidget1` returned 429, and `demoBwidget1` stored `e8dfe313-ce04-484c-bb7c-5b4936f45b4a`. Provider A down stored `411a0d2a-8b6b-434f-ac7f-7ec6e34bfa93` from `ipapi.co` in Berlin. Both down stored `7db43b74-1b59-4b25-9d20-e7252eab9f35` with no geo. Forced confirmation failure stored `6249c712-343b-47f1-a7dc-8a08bf04920f` and logged `attempts=3`. A filled reserved field returned `{ "ok": true }` and stored 0 rows.
+Where it was wrong: Nothing in the six results had to be rerun. The limits and flags were put back: 30 per IP, 60 per widget, both geo mock flags false, force fail false.
+What I changed myself: I reviewed the code and prompts.
+What I can explain line by line: Why the page submit and the dashboard row are the same lead, and why a thrown confirmation still returns 201.
+
+Date: 2026-10-29
 Phase: 4, task 4.1 Section 6 review
 What I asked for: A pass over every Section 6 box, ticking one only when the proof is real command output.
 Where help was useful: The PDF outline names the same six groups as this file: widget management, widget delivery, public submission API, abuse protection, enrichment and safe side effects, and documentation. `EVIDENCE.md` has 15 ticked boxes under those groups. Each tick has a transcript: status codes, cache headers, a stored id, or a file listing.

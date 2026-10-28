@@ -262,23 +262,79 @@ health 200 {"ok":true,"db":"up"}
 
 ## Acceptance probes
 
-- [ ] Probe 1. `POST` a valid submission from the second-origin test page. It is stored, the status is 2xx, and it is visible through the dashboard API.
-  - Proof:
+- [x] Probe 1. `POST` a valid submission from the second-origin test page. It is stored, the status is 2xx, and it is visible through the dashboard API.
+  - Proof: 2026-10-29. The form on `http://127.0.0.1:8080` submitted `probe1@example.com`. The page then said Thanks. The owner dashboard for tenant `576695d7-66f5-4ff5-a58c-1514e241c569` listed that one row.
 
-- [ ] Probe 2. A malformed payload and an oversized payload return clean 4xx JSON errors, never 500.
-  - Proof:
+```text
+page http://127.0.0.1:8080
+POST http://127.0.0.1:3010/submissions 201
+page text Thanks.
+login 200
+GET /dashboard/submissions 200 matches 1
+id 51e06afa-5461-4ef8-ad04-1cbde33417eb
+tenant 576695d7-66f5-4ff5-a58c-1514e241c569
+city Ashburn
+country US
+```
 
-- [ ] Probe 3. A burst of rapid submissions returns 429. A normal request right after still succeeds.
-  - Proof:
+- [x] Probe 2. A malformed payload and an oversized payload return clean 4xx JSON errors, never 500.
+  - Proof: 2026-10-29, API on `http://127.0.0.1:3010`. Origin `http://127.0.0.1:8080`. The first body was `{`. The second was JSON with a key that is not a UUID. The third was valid JSON larger than 8 KiB. None returned 500.
 
-- [ ] Probe 4. Disable geo provider A. The next submission is stored and enriched by provider B. Disable both. The submission is stored without geo.
-  - Proof:
+```text
+400 application/json; charset=utf-8 {"error":"invalid submission"}
+400 application/json; charset=utf-8 {"error":"invalid submission"}
+413 application/json; charset=utf-8 {"error":"payload too large"}
+```
 
-- [ ] Probe 5. Force the email or webhook side effect to throw. The submission still returns success and is stored.
-  - Proof:
+- [x] Probe 3. A burst of rapid submissions returns 429. A normal request right after still succeeds.
+  - Proof: 2026-10-29, API on `http://127.0.0.1:3010`. The IP burst used a limit of 1 request per 10 seconds, and the third request waited for that window. The widget burst used a limit of 1 request per widget. The next request used `demoBwidget1` and did not wait. Limits were restored to 30 per IP and 60 per widget.
 
-- [ ] Probe 6. Fill the honeypot field the way a bot would. The submission is silently dropped or rejected, without revealing the honeypot.
-  - Proof:
+```text
+201 application/json; charset=utf-8 {"ok":true,"id":"4e9ce61f-b90c-4104-8588-a1f183e5eae1"}
+429 application/json; charset=utf-8 {"error":"too many requests"}
+201 application/json; charset=utf-8 {"ok":true,"id":"cd43bc67-01f1-4183-a1f6-9b3f40db5207"}
+ip-summary 201 429 201
+
+201 application/json; charset=utf-8 {"ok":true,"id":"0d11fde3-be9d-49d7-b4a2-4dbeb409e1ed"}
+429 application/json; charset=utf-8 {"error":"too many requests"}
+201 application/json; charset=utf-8 {"ok":true,"id":"e8dfe313-ce04-484c-bb7c-5b4936f45b4a"}
+widget-summary 201 429 201
+```
+
+- [x] Probe 4. Disable geo provider A. The next submission is stored and enriched by provider B. Disable both. The submission is stored without geo.
+  - Proof: 2026-10-29, API on `http://127.0.0.1:3010`, `GEO_MODE=mock`. First `GEO_MOCK_A_DOWN=true` and `GEO_MOCK_B_DOWN=false`. Then both flags true.
+
+```text
+POST 201 {"ok":true,"id":"411a0d2a-8b6b-434f-ac7f-7ec6e34bfa93"}
+geo_provider ipapi.co
+country_code DE
+country Germany
+city Berlin
+
+POST 201 {"ok":true,"id":"7db43b74-1b59-4b25-9d20-e7252eab9f35"}
+geo_provider null
+geo null
+```
+
+- [x] Probe 5. Force the email or webhook side effect to throw. The submission still returns success and is stored.
+  - Proof: 2026-10-29, API on `http://127.0.0.1:3010`. `SIDE_EFFECT_FORCE_FAIL=true`. The response was 201. The alert has no recipient.
+
+```text
+POST 201 {"ok":true,"id":"6249c712-343b-47f1-a7dc-8a08bf04920f"}
+side effect failed submission=6249c712-343b-47f1-a7dc-8a08bf04920f attempts=3
+stored id 6249c712-343b-47f1-a7dc-8a08bf04920f
+```
+
+- [x] Probe 6. Fill the honeypot field the way a bot would. The submission is silently dropped or rejected, without revealing the honeypot.
+  - Proof: 2026-10-29, API on `http://127.0.0.1:3010`, after the flags were restored. The body included a non-empty reserved field. The response does not name the field or the rule. Postgres stored no row for that idempotency key. Restored settings: IP limit 30, widget limit 60, both geo mock flags false, force fail false.
+
+```text
+200 application/json; charset=utf-8 {"ok":true}
+names honeypot false
+names company_website false
+names spam false
+stored_rows 0
+```
 
 ## Shared requirements
 
