@@ -21,6 +21,14 @@ What I can explain line by line:
 ## Entries
 
 Date: 2026-10-28
+Phase: 1, task 1.6 non-goal
+What I asked for: Do the next task.
+Where help was useful: One sentence in `DESIGN.md`. A real CDN, domain, or hosted deployment stays out of scope.
+Where it was wrong: Nothing to run. This task is a scope sentence, not a feature.
+What I changed myself: I asked for the next task.
+What I can explain line by line: Why local ports are the whole deployment, and why a public host is not part of the capstone.
+
+Date: 2026-10-28
 Phase: 1, task 1.5 API contracts
 What I asked for: Do the next task.
 Where help was useful: `src/http/contracts.js` locks the method, path, auth, status codes, and one example per route. `npm test` passed 34 checks.

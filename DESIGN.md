@@ -22,9 +22,7 @@ Source of truth: `Lead-Capture Platform Live Capstone.pdf`. Section 6 is require
 
 ## Explicit non-goal
 
-Phase 1 picks one explicit non-goal from the Section 7 limits and writes it here in one sentence.
-
-Open: _not chosen yet._
+A real CDN, domain, or hosted deployment is a non-goal, so the API and the customer page stay on local ports.
 
 ## Widget model
 
