@@ -21,6 +21,14 @@ What I can explain line by line:
 ## Entries
 
 Date: 2026-10-28
+Phase: 2, task 2.5 isolation proof
+What I asked for: Do the next task.
+Where help was useful: Two live tenants. Tenant B received 404 for read, patch, delete, and embed of tenant A's widget, and an empty list. A stored submission for A was invisible to B's `WHERE tenant_id = $1` queries. B's insert was rejected with `tenant_id must match the widget`. B's update and delete changed 0 rows. The transcript is in `EVIDENCE.md`.
+Where it was wrong: Host port 5432 refused the Compose password, so the submission lines were run inside the database container. `GET /dashboard/submissions` is still unbuilt, so that half is SQL, not HTTP.
+What I changed myself: I asked for the next task.
+What I can explain line by line: Why B's widget calls are 404, and why a submission row cannot be stored under a different tenant than its widget.
+
+Date: 2026-10-28
 Phase: 2, task 2.4 widget CRUD
 What I asked for: Do the next task.
 Where help was useful: `POST`, `GET`, `PATCH`, and `DELETE /widgets`, plus `GET /widgets/:id/embed`. The tenant id comes from the token. A second tenant gets 404 for the same widget id. Create returns the one-line embed snippet.

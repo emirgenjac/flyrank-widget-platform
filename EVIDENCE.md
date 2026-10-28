@@ -2,15 +2,39 @@
 
 One pasted proof per requirement. A claim without a test name and output, a curl transcript, or a log line stays unchecked. Do not tick a box from memory.
 
-The app is not built yet, so every slot below is empty on purpose.
+Tick a box only when the proof under it is real command output. Empty slots stay empty.
 
 ## Section 6, widget management
 
 - [ ] Authenticated CRUD for widgets. Requests without valid auth are rejected.
   - Proof:
 
-- [ ] Tenant A cannot read or modify tenant B widgets or submissions.
-  - Proof:
+- [x] Tenant A cannot read or modify tenant B widgets or submissions.
+  - Proof: 2026-10-28, API on `http://127.0.0.1:3000`. Tenant A is `f4ed0d3f-4f05-4efa-a3bf-66706b6e2ffd`. Tenant B is `cf4a7880-7a28-4ad9-8079-f9ec7a2049b0`. Widget `fb6d430c-ee35-45c8-9c10-e127daab2253` belongs to A. `GET /dashboard/submissions` is not built yet, so the submission lines are the owner filter `WHERE tenant_id = $1` from `src/data/ownerQueries.js`, run in Postgres. The proof widget and submission were deleted after these results.
+
+```text
+login A 200 tenant f4ed0d3f-4f05-4efa-a3bf-66706b6e2ffd
+login B 200 tenant cf4a7880-7a28-4ad9-8079-f9ec7a2049b0
+A GET /widgets 200 count 1 id fb6d430c-ee35-45c8-9c10-e127daab2253 title Join the list tenant f4ed0d3f-4f05-4efa-a3bf-66706b6e2ffd
+B GET /widgets/fb6d430c-ee35-45c8-9c10-e127daab2253 404 {"error":"not found"}
+B PATCH /widgets/fb6d430c-ee35-45c8-9c10-e127daab2253 404 {"error":"not found"}
+B DELETE /widgets/fb6d430c-ee35-45c8-9c10-e127daab2253 404 {"error":"not found"}
+B GET /widgets/fb6d430c-ee35-45c8-9c10-e127daab2253/embed 404 {"error":"not found"}
+B GET /widgets count 0
+A GET /widgets/fb6d430c-ee35-45c8-9c10-e127daab2253 200 title Join the list tenant f4ed0d3f-4f05-4efa-a3bf-66706b6e2ffd
+```
+
+```text
+INSERT 0 1
+A listSubmissions count 1
+B listSubmissions count 0
+B listSubmissionsByWidget count 0
+B INSERT on A's widget: ERROR: tenant_id must match the widget
+B UPDATE widgets: UPDATE 0
+B DELETE submissions: DELETE 0
+widget title after B writes: Join the list, tenant f4ed0d3f-4f05-4efa-a3bf-66706b6e2ffd
+submission tenant after B delete: f4ed0d3f-4f05-4efa-a3bf-66706b6e2ffd
+```
 
 ## Section 6, widget delivery
 
