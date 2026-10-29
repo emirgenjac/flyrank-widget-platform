@@ -338,23 +338,89 @@ stored_rows 0
 
 ## Shared requirements
 
-- [ ] 1. Layered architecture. Data, logic, and HTTP are separated. Jobs are separate from the request path.
-  - Proof:
+- [x] 1. Layered architecture. Data, logic, and HTTP are separated. Jobs are separate from the request path.
+  - Proof: 2026-10-29. `src` has separate `data`, `http`, `jobs`, and `logic` folders. The submission route does not call the mailer. It enqueues the job from the response `finish` event.
 
-- [ ] 2. Validation at the boundary. Bad input returns a clean 4xx, never a 500.
-  - Proof:
+```text
+data
+http
+jobs
+logic
+widget
+res.once("finish", () => {
+deliverConfirmation in http: 0
+```
 
-- [ ] 3. At least one background job. Slow work is off the request path, with retries and a failure alert.
-  - Proof:
+- [x] 2. Validation at the boundary. Bad input returns a clean 4xx, never a 500.
+  - Proof: 2026-10-29, the same run as Probe 2. API `http://127.0.0.1:3010`. None of the three responses is 500.
 
-- [ ] 4. Real persistence. Schema lives in migrations, indexes match the queries, and tenants are isolated.
-  - Proof:
+```text
+400 application/json; charset=utf-8 {"error":"invalid submission"}
+400 application/json; charset=utf-8 {"error":"invalid submission"}
+413 application/json; charset=utf-8 {"error":"payload too large"}
+```
 
-- [ ] 5. Idempotency where it matters. A retried submission is stored once, and the side effect runs once.
-  - Proof:
+- [x] 3. At least one background job. Slow work is off the request path, with retries and a failure alert.
+  - Proof: 2026-10-29, the same run as Probe 5. The HTTP status was already 201. The worker then logged the alert after 3 attempts. The enqueue sits on `res.once("finish")`, so the job is not part of the request function.
 
-- [ ] 6. Secrets stay clean. Environment only, never logged, never committed.
-  - Proof:
+```text
+POST 201 {"ok":true,"id":"6249c712-343b-47f1-a7dc-8a08bf04920f"}
+side effect failed submission=6249c712-343b-47f1-a7dc-8a08bf04920f attempts=3
+stored id 6249c712-343b-47f1-a7dc-8a08bf04920f
+```
 
-- [ ] 7. Cost tracking if AI is used. Not applicable: this product does not call an AI API. Do not add one only to satisfy this line.
-  - Proof: N/A until a product AI call exists. If one is added later, record per-call cost, attribution, and a budget guard here before calling the feature done.
+- [x] 4. Real persistence. Schema lives in migrations, indexes match the queries, and tenants are isolated.
+  - Proof: 2026-10-29. Migrations are `migrations/001_widgets.sql`, `migrations/002_submissions.sql`, and `migrations/003_users.sql`. Postgres has the public id, idempotency key, widget-time, and tenant indexes. `node --test src/data/ownerQueries.test.js` passed `every owner query filters by tenant id`.
+
+```text
+submissions_idempotency_key_key
+submissions_widget_created_at_idx
+submissions_tenant_id_idx
+users_tenant_id_idx
+widgets_public_id_key
+widgets_tenant_id_idx
+every owner query filters by tenant id
+the migrations define the public id, idempotency key, and submission time indexes
+```
+
+- [x] 5. Idempotency where it matters. A retried submission is stored once, and the side effect runs once.
+  - Proof: 2026-10-29, API on `http://127.0.0.1:3010`. The same key and payload were posted twice. Postgres has one row. The API log has one confirmation line for that id.
+
+```text
+201 {"ok":true,"id":"658f473c-f060-408c-8e79-f9e00369c147"}
+200 {"ok":true,"id":"658f473c-f060-408c-8e79-f9e00369c147"}
+rows 1
+confirmation-lines 1
+```
+
+- [x] 6. Secrets stay clean. Environment only, never logged, never committed.
+  - Proof: 2026-10-29. `.env` is ignored. `git ls-files` lists `.env.example` and does not list `.env`. The API log has no database URL. The logging tests passed.
+
+```text
+.gitignore:5:.env	.env
+tracked .env.example
+confirmation-lines checked separately
+url-lines 0
+log lines drop secret values, database passwords, and bearer tokens
+tests 6
+pass 6
+fail 0
+```
+
+- [x] 7. Cost tracking if AI is used. Not applicable: this product does not call an AI API. Do not add one only to satisfy this line.
+  - Proof: N/A. A search of `src` for an AI client found no matches. If a product AI call is added later, record per-call cost, attribution, and a budget guard here before calling the feature done.
+
+## README boot
+
+- [x] `docker compose up` and `npm run seed` from `README.md` boot the API, Postgres, and the customer page.
+  - Proof: 2026-10-29. Compose was already up from `docker compose up`. Health, the page, and a second seed matched the README. The seed printed the same two tenant ids.
+
+```text
+api Up 0.0.0.0:3010->3000/tcp
+customer-site Up 0.0.0.0:8080->8080/tcp
+db Up (healthy) 0.0.0.0:5435->5432/tcp
+health 200 {"ok":true,"db":"up"}
+page 200 demoAwidget1 true
+tenant 576695d7-66f5-4ff5-a58c-1514e241c569 email owner-a@example.com widget demoAwidget1
+tenant fbd8c354-f706-4df7-9450-add61829c9ca email owner-b@example.com widget demoBwidget1
+```

@@ -21,6 +21,14 @@ What I can explain line by line:
 ## Entries
 
 Date: 2026-10-29
+Phase: 4, tasks 4.3 and 4.4 shared requirements and boot
+What I asked for: The shared requirements recorded in `EVIDENCE.md`, including the N/A note for product AI cost, and a check that the README boot commands work.
+Where help was useful: `src` is split into `data`, `http`, `jobs`, and `logic`. The mailer is not called from `src/http`. The same idempotency key returned 201 then 200 for `658f473c-f060-408c-8e79-f9e00369c147`, one row, and one confirmation line. `.env` is ignored. The API log has no database URL. `docker compose ps` showed `api`, `db`, and `customer-site`. Health was `{ "ok": true, "db": "up" }`. A second `npm run seed` kept tenants `576695d7-66f5-4ff5-a58c-1514e241c569` and `fbd8c354-f706-4df7-9450-add61829c9ca`.
+Where it was wrong: Nothing in those checks had to be repeated. Cost tracking stays N/A because `src` has no AI client.
+What I changed myself: I reviewed the code and prompts. Stretch goals were not started.
+What I can explain line by line: Why the job is enqueued from the response finish event, and why the second post of the same key does not send a second confirmation.
+
+Date: 2026-10-29
 Phase: 4, task 4.2 acceptance probes
 What I asked for: The six acceptance probes, run in order, with each result pasted into `EVIDENCE.md`.
 Where help was useful: The page at `http://127.0.0.1:8080` posted to `http://127.0.0.1:3010/submissions` and got 201. The page said Thanks. The owner dashboard listed `51e06afa-5461-4ef8-ad04-1cbde33417eb` for tenant `576695d7-66f5-4ff5-a58c-1514e241c569`, city Ashburn. Malformed JSON was 400 and the oversized body was 413. An IP burst returned 429, then the next window stored a row. A second request to `demoAwidget1` returned 429, and `demoBwidget1` stored `e8dfe313-ce04-484c-bb7c-5b4936f45b4a`. Provider A down stored `411a0d2a-8b6b-434f-ac7f-7ec6e34bfa93` from `ipapi.co` in Berlin. Both down stored `7db43b74-1b59-4b25-9d20-e7252eab9f35` with no geo. Forced confirmation failure stored `6249c712-343b-47f1-a7dc-8a08bf04920f` and logged `attempts=3`. A filled reserved field returned `{ "ok": true }` and stored 0 rows.
